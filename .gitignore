@@ -1,0 +1,25 @@
+# Node.js dependencies
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build artifacts
+build/
+dist/
+
+# Logs
+logs/
+*.log
+
+# Editor directories and files
+.DS_Store
+*.swp
+*~
+/.idea/
+/.vscode/
+/.env.local
