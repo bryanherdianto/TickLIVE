@@ -1,5 +1,5 @@
 const eventRepository = require('../repositories/event.repository');
-const baseResponse = require('../utils/baseResponse');
+const baseResponse = require('../utils/baseResponse.util');
 
 exports.getAllEvents = async (req, res) => {
     try {

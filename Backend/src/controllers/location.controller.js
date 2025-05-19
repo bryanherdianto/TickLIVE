@@ -1,5 +1,5 @@
 const locationRepository = require('../repositories/location.repository');
-const baseResponse = require('../utils/baseResponse');
+const baseResponse = require('../utils/baseResponse.util');
 
 exports.getAllLocations = async (req, res) => {
     try {
