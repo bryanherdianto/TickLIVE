@@ -4,7 +4,7 @@ const saltRounds = 10;
 
 exports.getAllUsers = async () => {
     try {
-        const res = await db.query('SELECT * FROM users');
+        const res = await db.query('SELECT * FROM user');
         return res.rows;
     }
     catch (error) {
