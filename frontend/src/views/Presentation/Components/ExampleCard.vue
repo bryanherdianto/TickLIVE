@@ -1,19 +1,9 @@
 <script setup>
-import { onMounted } from "vue";
-import setTooltip from "@/assets/js/tooltip";
-import { useAppStore } from "@/stores";
-
-const store = useAppStore();
-
 defineProps({
   route: { type: String, required: true },
   image: { type: String, required: true },
   title: { type: String, default: "" },
   price: { type: Number, default: 0 }
-});
-
-onMounted(() => {
-  setTooltip(store.bootstrap);
 });
 </script>
 

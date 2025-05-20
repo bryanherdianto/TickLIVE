@@ -1,11 +1,10 @@
 <script setup>
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import { ref, watch } from "vue";
 import { useWindowsWidth } from "../../assets/js/useWindowsWidth";
 
 // images
 import ArrDark from "@/assets/img/down-arrow-dark.svg";
-import downArrow from "@/assets/img/down-arrow.svg";
 import DownArrWhite from "@/assets/img/down-arrow-white.svg";
 import { useClerk } from '@clerk/vue'
 import { SignedIn, SignedOut, UserButton } from '@clerk/vue';
@@ -92,7 +91,22 @@ watch(
     }
   }
 );
+
+const router = useRouter()
+
+function openVenues() {
+  router.push('/my-venues')
+}
+
+function openTickets() {
+  router.push('/my-tickets')
+}
+
+function openEvents() {
+  router.push('/my-events')
+}
 </script>
+
 <template>
   <nav class="navbar navbar-expand-lg top-0" :class="{
     'z-index-3 w-100 shadow-none navbar-transparent position-absolute my-3':
@@ -103,8 +117,8 @@ watch(
     ' navbar-dark bg-gradient-dark z-index-3 py-3': props.dark
   }">
     <div :class="props.transparent || props.light || props.dark
-        ? 'container'
-        : 'container-fluid px-0'
+      ? 'container'
+      : 'container-fluid px-0'
       ">
       <RouterLink class="navbar-brand d-none d-md-block fs-5" :class="[
         (props.transparent && textDark.value) || !props.transparent
@@ -114,19 +128,36 @@ watch(
         data-placement="bottom">
         TickLIVE
       </RouterLink>
-      <RouterLink class="navbar-brand d-block d-md-none fs-5" :class="props.transparent || props.dark
-          ? 'text-white'
-          : 'font-weight-bolder ms-sm-3'
+      <RouterLink class="navbar-brand d-block d-md-none fs-6" :class="props.transparent || props.dark
+        ? 'text-white'
+        : 'font-weight-bolder ms-sm-3'
         " to="/" rel="tooltip" title="Designed and Coded by Creative Tim" data-placement="bottom">
         TickLIVE
       </RouterLink>
       <div class="ms-auto d-lg-none d-block">
         <SignedOut>
-          <button @click="clerk.openSignIn()" 
-            class="btn btn-sm bg-gradient-success mb-0">Login</button>
+          <button @click="clerk.openSignIn()" class="btn btn-sm bg-gradient-success mb-0">Login</button>
         </SignedOut>
         <SignedIn>
-          <UserButton />
+          <UserButton>
+            <UserButton.MenuItems>
+              <UserButton.Action label="My tickets" @click="openTickets">
+                <template #labelIcon>
+                  <i class="fa fa-ticket-alt"></i>
+                </template>
+              </UserButton.Action>
+              <UserButton.Action label="My venues" @click="openVenues">
+                <template #labelIcon>
+                  <i class="fa fa-building"></i>
+                </template>
+              </UserButton.Action>
+              <UserButton.Action label="My events" @click="openEvents">
+                <template #labelIcon>
+                  <i class="fa fa-calendar-alt"></i>
+                </template>
+              </UserButton.Action>
+            </UserButton.MenuItems>
+          </UserButton>
         </SignedIn>
       </div>
       <button class="navbar-toggler border-0 shadow-none ms-2" type="button" data-bs-toggle="collapse"
@@ -140,13 +171,15 @@ watch(
       <div class="collapse navbar-collapse w-100 pt-3 pb-2 py-lg-0" id="navigation">
         <ul class="navbar-nav navbar-nav-hover ms-auto">
           <li class="nav-item dropdown dropdown-hover mx-2">
-            <a role="button" class="nav-link ps-2 d-flex cursor-pointer align-items-center" href="/events" :class="getTextColor()" aria-expanded="false">
+            <a role="button" class="nav-link ps-2 d-flex cursor-pointer align-items-center" href="/events"
+              :class="getTextColor()" aria-expanded="false">
               <i class="material-icons opacity-6 me-2 text-md" :class="getTextColor()">dashboard</i>
               Events
             </a>
           </li>
           <li class="nav-item dropdown dropdown-hover mx-2">
-            <a role="button" class="nav-link ps-2 d-flex cursor-pointer align-items-center" href="/venues" :class="getTextColor()" aria-expanded="false">
+            <a role="button" class="nav-link ps-2 d-flex cursor-pointer align-items-center" href="/venues"
+              :class="getTextColor()" aria-expanded="false">
               <i class="material-icons opacity-6 me-2 text-md" :class="getTextColor()">view_day</i>
               Venues
             </a>
@@ -250,7 +283,25 @@ watch(
               </button>
             </SignedOut>
             <SignedIn>
-              <UserButton />
+              <UserButton>
+                <UserButton.MenuItems>
+                  <UserButton.Action label="My tickets" @click="openTickets">
+                    <template #labelIcon>
+                      <i class="fa fa-ticket-alt"></i>
+                    </template>
+                  </UserButton.Action>
+                  <UserButton.Action label="My venues" @click="openVenues">
+                    <template #labelIcon>
+                      <i class="fa fa-building"></i>
+                    </template>
+                  </UserButton.Action>
+                  <UserButton.Action label="My events" @click="openEvents">
+                    <template #labelIcon>
+                      <i class="fa fa-calendar-alt"></i>
+                    </template>
+                  </UserButton.Action>
+                </UserButton.MenuItems>
+              </UserButton>
             </SignedIn>
           </li>
         </ul>
