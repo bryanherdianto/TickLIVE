@@ -13,7 +13,7 @@ import data from "./Sections/Data/designBlocksData";
 import BuiltByDevelopers from "./Components/BuiltByDevelopers.vue";
 import PresentationTestimonials from "./Sections/PresentationTestimonials.vue";
 import PresentationInformation from "./Sections/PresentationInformation.vue";
-import Contact from "./Sections/AuthorContact.vue";
+import Contact from "./Sections/PresentationContact.vue";
 
 import vueMkHeader from "@/assets/img/vue-mk-header.jpg";
 

@@ -1,9 +1,13 @@
 import { createRouter, createWebHistory } from "vue-router";
 import PresentationView from "../views/Presentation/PresentationView.vue";
-import AboutView from "../views/LandingPages/AboutUs/AboutView.vue";
-import AuthorView from "../views/LandingPages/Author/AuthorView.vue";
-import VenueDetail from "../views/LandingPages/AboutUs/VenueDetail.vue";
-import EventDetail from "../views/LandingPages/Author/EventDetail.vue";
+import VenueDetail from "../views/LandingPages/Venue/VenueDetail.vue";
+import EventDetail from "../views/LandingPages/Event/EventDetail.vue";
+import MyTicketsView from "../views/LandingPages/MyTickets/MyTicketsView.vue";
+import MyEventsView from "../views/LandingPages/MyEvents/MyEventsView.vue";
+import MyVenuesView from "../views/LandingPages/MyVenues/MyVenuesView.vue";
+import EventView from "../views/LandingPages/Event/EventView.vue";
+import VenueView from "../views/LandingPages/Venue/VenueView.vue";
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -15,12 +19,12 @@ const router = createRouter({
     {
       path: "/events",
       name: "events",
-      component: AuthorView,
+      component: EventView,
     },
     {
       path: "/venues",
       name: "venues",
-      component: AboutView,
+      component: VenueView,
     },
     {
       path: '/venues/:id',
@@ -31,6 +35,21 @@ const router = createRouter({
       path: '/events/:id',
       name: 'EventDetail',
       component: EventDetail,
+    },
+    {
+      path: '/my-tickets',
+      name: 'MyTickets',
+      component: MyTicketsView,
+    },
+    {
+      path: '/my-events',
+      name: 'MyEvents',
+      component: MyEventsView,
+    },
+    {
+      path: '/my-venues',
+      name: 'MyVenues',
+      component: MyVenuesView,
     }
   ],
 });
