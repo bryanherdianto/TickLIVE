@@ -55,3 +55,13 @@ exports.deleteEvent = async (id) => {
         throw error;
     }
 }
+
+exports.getEventByLocationAndDate = async (locationId, date) => {
+    try {
+        const res = await db.query('SELECT * FROM events WHERE location_id = $1 AND date = $2', [locationId, date]);
+        return res.rows;
+    } catch (error) {
+        console.error('Error fetching events by location and date:', error);
+        throw error;
+    }
+}

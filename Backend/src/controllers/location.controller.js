@@ -1,5 +1,7 @@
+const { use } = require('react');
 const locationRepository = require('../repositories/location.repository');
 const baseResponse = require('../utils/baseResponse.util');
+const cloudinary = require('../utils/cloudinary.config');
 
 exports.getAllLocations = async (req, res) => {
     try {
@@ -26,21 +28,59 @@ exports.getLocationById = async (req, res) => {
 }
 
 exports.createLocation = async (req, res) => {
-    const { name, address, image, description } = req.body;
+    const { name, address, description } = req.body;
     try {
-        const newLocation = await locationRepository.createLocation({ name, address, image, description });
+        let imageUrl = null;
+
+        if (req.file) {
+            // Gunakan Promise untuk menangani upload_stream dengan benar
+            const result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream({
+                    folder: 'locations',
+                    use_filename: true
+                }, (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result);
+                });
+                uploadStream.end(req.file.buffer);
+            });
+            
+            imageUrl = result.secure_url;
+        }
+        
+        const newLocation = await locationRepository.createLocation({ 
+            name, 
+            address, 
+            image: imageUrl, // Pastikan nama field sesuai dengan model database
+            description 
+        });
+        
         baseResponse(res, true, 201, 'Location created successfully', newLocation);
     } catch (error) {
         console.error('Error creating location:', error);
         baseResponse(res, false, 500, 'Internal server error');
     }
 }
-
 exports.updateLocation = async (req, res) => {
     const { id } = req.params;
-    const { name, address, image, description } = req.body;
+    const { name, address, description } = req.body;
+    let updateData = { name, address, description };
     try {
-        const updatedLocation = await locationRepository.updateLocation(id, { name, address, image, description });
+        if (req.file) {
+            // Upload dari buffer, bukan path
+            const result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream({
+                    folder: 'locations',
+                    use_filename: true
+                }, (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result);
+                });
+                uploadStream.end(req.file.buffer);
+            });
+            updateData.imageUrl = result.secure_url;
+        }
+        const updatedLocation = await locationRepository.updateLocation(id, updateData);
         if (!updatedLocation) {
             return baseResponse(res, false, 404, 'Location not found');
         }

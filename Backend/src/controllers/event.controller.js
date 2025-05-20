@@ -28,6 +28,10 @@ exports.getEventById = async (req, res) => {
 exports.createEvent = async (req, res) => {
     const { name, id_host, date, location_id } = req.body;
     try {
+        const eventExists = await eventRepository.getEventByLocationAndDate(location_id, date);
+        if (eventExists) {
+            return baseResponse(res, false, 409, 'Event already exists at this location and date');
+        }
         const newEvent = await eventRepository.createEvent({ name, id_host, date, location_id });
         baseResponse(res, true, 201, 'Event created successfully', newEvent);
     } catch (error) {

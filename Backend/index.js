@@ -5,14 +5,11 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-corsOptions = {
-    origin: 'https://ticklive.vercel.app/', // Replace with your frontend URL
-    methods: 'GET,PUT,POST,DELETE',
-    preflightContinue: false,
-    optionsSuccessStatus: 204
-};
-
-app.use(cors(corsOptions));
+app.use(cors({
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use(express.json());
 app.use('/user', require('./src/routes/user.routes'))
