@@ -5,7 +5,6 @@ import { useWindowsWidth } from "../../assets/js/useWindowsWidth";
 
 // images
 import ArrDark from "@/assets/img/down-arrow-dark.svg";
-import downArrow from "@/assets/img/down-arrow.svg";
 import DownArrWhite from "@/assets/img/down-arrow-white.svg";
 import { useClerk } from '@clerk/vue'
 import { SignedIn, SignedOut, UserButton } from '@clerk/vue';
@@ -114,7 +113,7 @@ watch(
         data-placement="bottom">
         TickLIVE
       </RouterLink>
-      <RouterLink class="navbar-brand d-block d-md-none fs-5" :class="props.transparent || props.dark
+      <RouterLink class="navbar-brand d-block d-md-none fs-6" :class="props.transparent || props.dark
           ? 'text-white'
           : 'font-weight-bolder ms-sm-3'
         " to="/" rel="tooltip" title="Designed and Coded by Creative Tim" data-placement="bottom">
