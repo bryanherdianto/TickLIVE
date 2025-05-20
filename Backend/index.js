@@ -6,7 +6,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 corsOptions = {
-    origin: 'http://localhost:3000', // Replace with your frontend URL
+    origin: 'https://ticklive.vercel.app/', // Replace with your frontend URL
     methods: 'GET,PUT,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 204
