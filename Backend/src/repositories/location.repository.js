@@ -23,8 +23,8 @@ exports.getLocationById = async (id) => {
 exports.createLocation = async (location) => {
     try {
         const res = await db.query(
-            'INSERT INTO locations (name, address, capacity) VALUES ($1, $2, $3) RETURNING *',
-            [location.name, location.address, location.capacity]
+            'INSERT INTO locations (name, address, image, description) VALUES ($1, $2, $3, $4) RETURNING *',
+            [location.name, location.address, location.image, location.description]
         );
         return res.rows[0];
     } catch (error) {
@@ -36,8 +36,8 @@ exports.createLocation = async (location) => {
 exports.updateLocation = async (id, location) => {
     try {
         const res = await db.query(
-            'UPDATE locations SET name = $1, address = $2, capacity = $3 WHERE id = $4 RETURNING *',
-            [location.name, location.address, location.capacity, id]
+            'UPDATE locations SET name = $1, address = $2, image = $3, description = $4 WHERE id = $5 RETURNING *',
+            [location.name, location.address, location.image, location.description, id]
         );
         return res.rows[0];
     } catch (error) {

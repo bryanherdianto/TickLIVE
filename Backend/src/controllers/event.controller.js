@@ -26,9 +26,9 @@ exports.getEventById = async (req, res) => {
 }
 
 exports.createEvent = async (req, res) => {
-    const { name, date, location_id } = req.body;
+    const { name, id_host, date, location_id } = req.body;
     try {
-        const newEvent = await eventRepository.createEvent({ name, date, location_id });
+        const newEvent = await eventRepository.createEvent({ name, id_host, date, location_id });
         baseResponse(res, true, 201, 'Event created successfully', newEvent);
     } catch (error) {
         console.error('Error creating event:', error);
@@ -38,9 +38,9 @@ exports.createEvent = async (req, res) => {
 
 exports.updateEvent = async (req, res) => {
     const { id } = req.params;
-    const { name, date, location_id } = req.body;
+    const { name, id_host, date, location_id } = req.body;
     try {
-        const updatedEvent = await eventRepository.updateEvent(id, { name, date, location_id });
+        const updatedEvent = await eventRepository.updateEvent(id, { name, id_host, date, location_id });
         if (!updatedEvent) {
             return baseResponse(res, false, 404, 'Event not found');
         }

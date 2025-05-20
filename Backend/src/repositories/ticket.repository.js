@@ -1,6 +1,6 @@
 const db = require('../database/pg.database');
 
-exports.getAlltickets = async () => {
+exports.getAllTickets = async () => {
     try {
         const res = await db.query('SELECT * FROM tickets');
         return res.rows;
@@ -37,7 +37,7 @@ exports.createTicket = async (ticketData) => {
 exports.updateTicket = async (ticketId, ticketData) => {
     try {
         const { user_id, seat_id, status } = ticketData;
-        const res = await db.query('UPDATE tickets SET user_id = $2, seat_id = $1, status = $3 WHERE id = $4 RETURNING *', [user_id, seat_id, status, ticketId]);
+        const res = await db.query('UPDATE tickets SET user_id = $1, seat_id = $2, status = $3 WHERE id = $4 RETURNING *', [user_id, seat_id, status, ticketId]);
         if (res.rows.length === 0) {
             throw new Error('Ticket update failed');
         }

@@ -26,9 +26,9 @@ exports.getLocationById = async (req, res) => {
 }
 
 exports.createLocation = async (req, res) => {
-    const { name, address, capacity } = req.body;
+    const { name, address, image, description } = req.body;
     try {
-        const newLocation = await locationRepository.createLocation({ name, address, capacity });
+        const newLocation = await locationRepository.createLocation({ name, address, image, description });
         baseResponse(res, true, 201, 'Location created successfully', newLocation);
     } catch (error) {
         console.error('Error creating location:', error);
@@ -38,9 +38,9 @@ exports.createLocation = async (req, res) => {
 
 exports.updateLocation = async (req, res) => {
     const { id } = req.params;
-    const { name, address, capacity } = req.body;
+    const { name, address, image, description } = req.body;
     try {
-        const updatedLocation = await locationRepository.updateLocation(id, { name, address, capacity });
+        const updatedLocation = await locationRepository.updateLocation(id, { name, address, image, description });
         if (!updatedLocation) {
             return baseResponse(res, false, 404, 'Location not found');
         }

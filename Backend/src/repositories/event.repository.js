@@ -23,8 +23,8 @@ exports.getEventById = async (id) => {
 exports.createEvent = async (event) => {
     try {
         const res = await db.query(
-            'INSERT INTO events (name, date, location_id) VALUES ($1, $2, $3) RETURNING *',
-            [event.name, event.date, event.location_id]
+            'INSERT INTO events (name, id_host, date, location_id) VALUES ($1, $2, $3, $4) RETURNING *',
+            [event.name, event.id_host, event.date, event.location_id]
         );
         return res.rows[0];
     } catch (error) {
@@ -36,8 +36,8 @@ exports.createEvent = async (event) => {
 exports.updateEvent = async (id, event) => {
     try {
         const res = await db.query(
-            'UPDATE events SET name = $1, date = $2, location_id = $3 WHERE id = $4 RETURNING *',
-            [event.name, event.date, event.location_id, id]
+            'UPDATE events SET name = $1, id_host = $2, date = $3, location_id = $4 WHERE id = $5 RETURNING *',
+            [event.name, event.id_host, event.date, event.location_id, id]
         );
         return res.rows[0];
     } catch (error) {
