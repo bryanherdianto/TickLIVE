@@ -1,4 +1,3 @@
-const { use } = require('react');
 const locationRepository = require('../repositories/location.repository');
 const baseResponse = require('../utils/baseResponse.util');
 const cloudinary = require('../utils/cloudinary.config');
