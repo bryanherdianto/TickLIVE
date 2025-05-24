@@ -142,7 +142,9 @@ const bookings = ref([
                 </div>
             </div>
         </div>
-    </section>    <!-- Modal backdrop -->
+    </section>
+    
+    <!-- Modal backdrop -->
     <div class="fixed-top h-100 w-100" v-if="showAddVenueModal"
         style="background-color: rgba(0,0,0,0.6); z-index: 1050;" @click.self="showAddVenueModal = false"></div>
 

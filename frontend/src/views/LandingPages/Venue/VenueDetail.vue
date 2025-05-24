@@ -5,8 +5,6 @@ import DefaultFooter from "../../../examples/footers/FooterDefault.vue";
 
 const room = {
     name: 'Urbanza Suites',
-    type: 'Double Bed',
-    discount: '20% OFF',
     rating: 4.5,
     reviews: 200,
     location: 'Main Road 123 Street, 23 Colony',
@@ -24,7 +22,7 @@ const room = {
     ],
     highlights: [
         { icon: 'fa fa-home', title: 'Clean & Safe Stay', description: 'A well-maintained and hygienic space just for you.' },
-        { icon: 'fa fa-soap', title: 'Enhanced Cleaning', description: 'Follows Staybnb’s strict cleaning standards.' },
+        { icon: 'fa fa-soap', title: 'Enhanced Cleaning', description: 'Follows Staybnb\'s strict cleaning standards.' },
         { icon: 'fa fa-map-marker', title: 'Excellent Location', description: '90% rated the location 5 stars.' },
         { icon: 'fa fa-bell', title: 'Smooth Check-In', description: '100% rated check-in as 5-star.' }
     ],
@@ -37,7 +35,6 @@ const room = {
 
 const checkIn = ref('')
 const checkOut = ref('')
-const guests = ref(1)
 </script>
 
 <template>
@@ -52,9 +49,8 @@ const guests = ref(1)
         <!-- Title and Info -->
         <div class="row">
             <div class="col-lg-8">
-                <h1 class="mb-1">{{ room.name }} <span class="badge bg-light text-dark">{{ room.type }}</span></h1>
+                <h1 class="mb-1">{{ room.name }}</h1>
                 <div class="d-flex align-items-center mb-2">
-                    <span class="badge bg-gradient-success me-2">{{ room.discount }}</span>
                     <span class="text-warning me-1"><i class="fa fa-star"></i> {{ room.rating }}</span>
                     <span class="text-muted small">{{ room.reviews }}+ reviews</span>
                 </div>
@@ -81,7 +77,7 @@ const guests = ref(1)
                 <div class="d-flex flex-wrap">
                     <span v-for="feature in room.features" :key="feature.label"
                         class="badge bg-light text-dark p-2 me-2 mb-2">
-                        <i :class="feature.icon"></i> {{ feature.label }}
+                        <i :class="feature.icon"></i>&nbsp;&nbsp;{{ feature.label }}
                     </span>
                 </div>
             </div>
@@ -106,7 +102,7 @@ const guests = ref(1)
                             </div>
                             
                             <div class="col-md d-flex align-items-end">
-                                <button class="btn bg-gradient-success w-100">Check Availability</button>
+                                <button class="btn bg-gradient-success w-100">Book Venue</button>
                             </div>
                         </div>
                     </div>
@@ -159,13 +155,13 @@ const guests = ref(1)
                                             class="avatar-image rounded-circle" alt="Host avatar">
                                     </div>
                                     <div>
-                                        <h5 class="mb-1">Hosted by {{ room.host.name }}</h5>
+                                        <h5 class="mb-1">Owned by {{ room.host.name }}</h5>
                                         <p class="mb-0 text-sm text-muted">{{ room.host.reviews }}+ reviews</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-12 col-md-4 text-center text-md-end">
-                                <button class="btn bg-gradient-success">Contact Now</button>
+                                <button class="btn bg-gradient-success">Contact</button>
                             </div>
                         </div>
                     </div>

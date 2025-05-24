@@ -27,7 +27,6 @@ import imgPagination from "@/assets/img/pagination.png";
 import imgAlert from "@/assets/img/alerts.jpg";
 import imgPopover from "@/assets/img/popovers.jpg";
 import imgModal from "@/assets/img/modals.jpg";
-import imgDropdowns from "@/assets/img/dropdowns.jpg";
 
 export default [
   {

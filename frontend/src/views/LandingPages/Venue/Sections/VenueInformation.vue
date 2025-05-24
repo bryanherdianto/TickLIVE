@@ -4,7 +4,7 @@
       <!-- Header -->
       <div class="row mb-4">
         <div class="col-lg-8">
-          <h2>Available Events</h2>
+          <h2>Available Venues</h2>
           <p class="text-muted">See and take advantage of our limited-time offers to create unforgettable memories.</p>
         </div>
       </div>
@@ -26,7 +26,7 @@
                 <div class="mt-3 mb-4">
                   <h6 class="mb-3">Venue Types</h6>
                   <div class="input-group input-group-outline">
-                    <div v-for="type in roomTypes" :key="'mobile-' + type" class="form-check mb-2">
+                    <div v-for="type in venueTypes" :key="'mobile-' + type" class="form-check mb-2">
                       <input class="form-check-input" type="checkbox" :id="'mobile-' + type" :value="type"
                         v-model="selectedTypes" />
                       <label class="form-check-label ms-2" :for="'mobile-' + type">{{ type }}</label>
@@ -99,7 +99,7 @@
                     <div class="mb-3">
                       <span v-for="(amenity, idx) in room.amenities" :key="idx"
                         class="badge bg-light text-dark me-2 mb-1">
-                        <i :class="amenity.icon"></i> {{ amenity.label }}
+                        <i :class="amenity.icon"></i>&nbsp;&nbsp;{{ amenity.label }}
                       </span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mt-4">
@@ -127,7 +127,7 @@
               <div class="mt-3 mb-4">
                 <h6 class="mb-3">Venue Types</h6>
                 <div class="input-group input-group-outline">
-                  <div v-for="type in roomTypes" :key="type" class="form-check mb-2">
+                  <div v-for="type in venueTypes" :key="type" class="form-check mb-2">
                     <input class="form-check-input" type="checkbox" :id="type" :value="type" v-model="selectedTypes" />
                     <label class="form-check-label ms-2" :for="type">{{ type }}</label>
                   </div>
@@ -226,7 +226,7 @@ const rooms = ref([
 ]);
 
 // Filters state
-const roomTypes = ['Single Bed', 'Double Bed', 'Luxury Room', 'Family Suite'];
+const venueTypes = ['Garden', 'Nightclub', 'Stadium', 'Conference Hall', 'Gymnasium', 'Auditorium', 'Rooftop', 'Pub', 'Beach'];
 const selectedTypes = ref([]);
 const priceRanges = [
   { label: '$0 to 500', min: 0, max: 500 },

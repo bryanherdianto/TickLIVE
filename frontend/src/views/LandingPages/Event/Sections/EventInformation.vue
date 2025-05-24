@@ -22,11 +22,11 @@
             <!-- Mobile filters content -->
             <div class="row">
               <div class="col-6">
-                <!-- Venue Types -->
+                <!-- Event Types -->
                 <div class="mt-3 mb-4">
-                  <h6 class="mb-3">Venue Types</h6>
+                  <h6 class="mb-3">Event Types</h6>
                   <div class="input-group input-group-outline">
-                    <div v-for="type in roomTypes" :key="'mobile-' + type" class="form-check mb-2">
+                    <div v-for="type in eventTypes" :key="'mobile-' + type" class="form-check mb-2">
                       <input class="form-check-input" type="checkbox" :id="'mobile-' + type" :value="type"
                         v-model="selectedTypes" />
                       <label class="form-check-label ms-2" :for="'mobile-' + type">{{ type }}</label>
@@ -99,7 +99,7 @@
                     <div class="mb-3">
                       <span v-for="(amenity, idx) in room.amenities" :key="idx"
                         class="badge bg-light text-dark me-2 mb-1">
-                        <i :class="amenity.icon"></i> {{ amenity.label }}
+                        <i :class="amenity.icon"></i>&nbsp;&nbsp;{{ amenity.label }}
                       </span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mt-4">
@@ -125,9 +125,9 @@
             <div class="card-body p-3 pt-0">
               <!-- Popular filters -->
               <div class="mt-3 mb-4">
-                <h6 class="mb-3">Venue Types</h6>
+                <h6 class="mb-3">Event Types</h6>
                 <div class="input-group input-group-outline">
-                  <div v-for="type in roomTypes" :key="type" class="form-check mb-2">
+                  <div v-for="type in eventTypes" :key="type" class="form-check mb-2">
                     <input class="form-check-input" type="checkbox" :id="type" :value="type" v-model="selectedTypes" />
                     <label class="form-check-label ms-2" :for="type">{{ type }}</label>
                   </div>
@@ -226,7 +226,43 @@ const rooms = ref([
 ]);
 
 // Filters state
-const roomTypes = ['Single Bed', 'Double Bed', 'Luxury Room', 'Family Suite'];
+const eventTypes = [
+  'Concert',
+  'Theater Performance',
+  'Stand-up Comedy Show',
+  'Film Screening',
+  'Art Exhibition',
+  'Dance Recital',
+  'Cultural Festival',
+  'Football Match',
+  'Basketball Game',
+  'Tennis Tournament',
+  'Esports Competition',
+  'Fitness Class',
+  'Boxing Match',
+  'Wedding Reception',
+  'Birthday Party',
+  'Graduation Party',
+  'Reunion',
+  'Baby Shower',
+  'Conference',
+  'Seminar',
+  'Product Launch',
+  'Workshop',
+  'Corporate Meeting',
+  'Award Ceremony',
+  'Religious Service',
+  'Community Meeting',
+  'Fundraiser',
+  'Book Club',
+  'Food Festival',
+  'Cooking Class',
+  'Fashion Show',
+  'Wellness Retreat',
+  'Yoga Class',
+  'Farmers Market',
+  'Art & Craft Fair'
+];
 const selectedTypes = ref([]);
 const priceRanges = [
   { label: '$0 to 500', min: 0, max: 500 },

@@ -143,17 +143,19 @@ function openEvents() {
             <UserButton.MenuItems>
               <UserButton.Action label="My tickets" @click="openTickets">
                 <template #labelIcon>
-                  <i class="fa fa-ticket-alt"></i>
+                  <i class="material-icons-round me-2 text-md">confirmation_number</i>
                 </template>
               </UserButton.Action>
+
               <UserButton.Action label="My venues" @click="openVenues">
                 <template #labelIcon>
-                  <i class="fa fa-building"></i>
+                  <i class="material-icons-round me-2 text-md">apartment</i>
                 </template>
               </UserButton.Action>
+
               <UserButton.Action label="My events" @click="openEvents">
                 <template #labelIcon>
-                  <i class="fa fa-calendar-alt"></i>
+                  <i class="material-icons-round me-2 text-md">event</i>
                 </template>
               </UserButton.Action>
             </UserButton.MenuItems>
@@ -287,17 +289,19 @@ function openEvents() {
                 <UserButton.MenuItems>
                   <UserButton.Action label="My tickets" @click="openTickets">
                     <template #labelIcon>
-                      <i class="fa fa-ticket-alt"></i>
+                      <i class="material-icons-round me-2 text-md">confirmation_number</i>
                     </template>
                   </UserButton.Action>
+
                   <UserButton.Action label="My venues" @click="openVenues">
                     <template #labelIcon>
-                      <i class="fa fa-building"></i>
+                      <i class="material-icons-round me-2 text-md">apartment</i>
                     </template>
                   </UserButton.Action>
+
                   <UserButton.Action label="My events" @click="openEvents">
                     <template #labelIcon>
-                      <i class="fa fa-calendar-alt"></i>
+                      <i class="material-icons-round me-2 text-md">event</i>
                     </template>
                   </UserButton.Action>
                 </UserButton.MenuItems>
