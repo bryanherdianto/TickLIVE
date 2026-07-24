@@ -18,12 +18,12 @@ import { HeartIcon } from "@heroicons/vue/20/solid";
 	>
 		<Header />
 
-		<main class="grow p-6 lg:p-12 max-w-7xl mx-auto w-full">
+		<main class="grow pb-10 p-4 sm:p-6 lg:p-12 max-w-7xl mx-auto w-full">
 			<!-- Event Header Section -->
 			<section
-				class="border-b-4 border-[#1a1a1a] pb-12 mb-12 flex flex-col md:flex-row justify-between items-start gap-8"
+				class="border-b-4 border-[#1a1a1a] pb-8 sm:pb-12 mb-8 sm:mb-12 flex flex-col md:flex-row justify-between items-start gap-6 sm:gap-8"
 			>
-				<div class="flex-1 space-y-8">
+				<div class="flex-1 space-y-5 sm:space-y-8">
 					<div
 						class="inline-block bg-[#e63b2e] text-white px-4 py-2 border-[3px] border-[#1a1a1a] shadow-[4px_4px_0_0_#1a1a1a] font-bold text-sm tracking-widest uppercase"
 					>
@@ -31,12 +31,12 @@ import { HeartIcon } from "@heroicons/vue/20/solid";
 					</div>
 
 					<h1
-						class="text-6xl md:text-8xl font-black leading-none uppercase tracking-tighter"
+						class="text-5xl sm:text-6xl md:text-8xl font-black leading-none uppercase tracking-tighter"
 					>
 						Cyber Punk<br />Orchestra
 					</h1>
 
-					<div class="flex flex-col sm:flex-row gap-4 pt-4">
+					<div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4">
 						<button
 							class="bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-[3px] border-[#1a1a1a] shadow-[6px_6px_0_0_#1a1a1a] hover:shadow-[2px_2px_0_0_#1a1a1a] hover:translate-x-1 hover:translate-y-1 transition-all px-8 py-2 font-bold text-lg flex items-center justify-center gap-2"
 						>
@@ -53,7 +53,7 @@ import { HeartIcon } from "@heroicons/vue/20/solid";
 				</div>
 
 				<div
-					class="md:w-2/5 pt-4 md:border-t-4 border-[#1a1a1a] md:pl-8 mt-12 md:mt-0"
+					class="md:w-2/5 md:pt-4 md:border-t-4 border-[#1a1a1a] md:pl-8 mt-0"
 				>
 					<p class="text-xl md:text-2xl font-medium leading-tight font-sans">
 						"A sensory overload where classical strings meet industrial
@@ -65,10 +65,10 @@ import { HeartIcon } from "@heroicons/vue/20/solid";
 
 			<!-- Brutalist Gallery -->
 			<section
-				class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-16 h-auto md:h-125"
+				class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-10 sm:mb-16 h-auto md:h-125"
 			>
 				<div
-					class="lg:col-span-2 border-4 border-[#1a1a1a] shadow-[8px_8px_0_0_#1a1a1a] bg-white h-75 md:h-full relative overflow-hidden group cursor-pointer"
+					class="lg:col-span-2 border-4 border-[#1a1a1a] shadow-[8px_8px_0_0_#1a1a1a] bg-white h-60 sm:h-75 md:h-full relative overflow-hidden group cursor-pointer"
 				>
 					<img
 						src="https://images.unsplash.com/photo-1540039155732-d6986c714be8?auto=format&fit=crop&q=80"
@@ -78,9 +78,9 @@ import { HeartIcon } from "@heroicons/vue/20/solid";
 					<div class="absolute inset-0 bg-transparent mix-blend-color"></div>
 				</div>
 
-				<div class="flex flex-col gap-6 h-full">
+				<div class="flex flex-col gap-4 sm:gap-6 h-full">
 					<div
-						class="flex-1 border-4 border-[#1a1a1a] shadow-[8px_8px_0_0_#1a1a1a] bg-white relative overflow-hidden group cursor-pointer h-50 md:h-auto"
+						class="flex-1 border-4 border-[#1a1a1a] shadow-[8px_8px_0_0_#1a1a1a] bg-white relative overflow-hidden group cursor-pointer h-40 sm:h-50 md:h-auto"
 					>
 						<img
 							src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&q=80"
@@ -89,7 +89,7 @@ import { HeartIcon } from "@heroicons/vue/20/solid";
 						/>
 					</div>
 					<div
-						class="flex-1 border-4 border-[#1a1a1a] shadow-[8px_8px_0_0_#1a1a1a] bg-white relative overflow-hidden group cursor-pointer h-50 md:h-auto"
+						class="flex-1 border-4 border-[#1a1a1a] shadow-[8px_8px_0_0_#1a1a1a] bg-white relative overflow-hidden group cursor-pointer h-40 sm:h-50 md:h-auto"
 					>
 						<img
 							src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&q=80"
@@ -101,16 +101,16 @@ import { HeartIcon } from "@heroicons/vue/20/solid";
 			</section>
 
 			<!-- Content Layout -->
-			<div class="flex flex-col lg:flex-row gap-12 text-[#1a1a1a]">
+			<div class="flex flex-col lg:flex-row gap-8 sm:gap-12 text-[#1a1a1a]">
 				<!-- Left: Description -->
-				<div class="flex-1 space-y-12 pr-0 lg:pr-12">
+				<div class="flex-1 space-y-8 sm:space-y-12 pr-0 lg:pr-12">
 					<section>
 						<h2
-							class="text-4xl font-bold border-b-4 border-[#1a1a1a] pb-2 mb-6 inline-block uppercase"
+							class="text-3xl sm:text-4xl font-bold border-b-4 border-[#1a1a1a] pb-2 mb-4 sm:mb-6 inline-block uppercase"
 						>
 							Overview
 						</h2>
-						<div class="text-lg space-y-6 font-sans leading-relaxed">
+						<div class="text-base sm:text-lg space-y-4 sm:space-y-6 font-sans leading-relaxed">
 							<p>
 								Experience the clash of centuries. The Cyber Punk Orchestra
 								brings together 60 classically trained musicians and 5
@@ -127,7 +127,7 @@ import { HeartIcon } from "@heroicons/vue/20/solid";
 
 					<section>
 						<h2
-							class="text-4xl font-bold border-b-4 border-[#1a1a1a] pb-2 mb-6 inline-block uppercase"
+							class="text-3xl sm:text-4xl font-bold border-b-4 border-[#1a1a1a] pb-2 mb-4 sm:mb-6 inline-block uppercase"
 						>
 							Lineup
 						</h2>
@@ -173,12 +173,12 @@ import { HeartIcon } from "@heroicons/vue/20/solid";
 
 					<section>
 						<h2
-							class="text-4xl font-bold border-b-4 border-[#1a1a1a] pb-2 mb-6 inline-block uppercase"
+							class="text-3xl sm:text-4xl font-bold border-b-4 border-[#1a1a1a] pb-2 mb-4 sm:mb-6 inline-block uppercase"
 						>
 							Location Info
 						</h2>
 						<div
-							class="border-4 border-[#1a1a1a] bg-white shadow-[8px_8px_0_0_#1a1a1a] p-6 h-60 flex items-center justify-center"
+							class="border-4 border-[#1a1a1a] bg-white shadow-[8px_8px_0_0_#1a1a1a] p-4 sm:p-6 h-52 sm:h-60 flex items-center justify-center"
 						>
 							<div class="text-center space-y-2">
 								<MapPinIcon class="w-12 h-12 mx-auto" />
@@ -188,7 +188,7 @@ import { HeartIcon } from "@heroicons/vue/20/solid";
 								</p>
 							</div>
 						</div>
-						<p class="mt-6 font-bold uppercase">
+						<p class="mt-4 sm:mt-6 font-bold uppercase">
 							Sector 7, Industrial District, Neo-Tokyo
 						</p>
 					</section>
@@ -197,7 +197,7 @@ import { HeartIcon } from "@heroicons/vue/20/solid";
 				<!-- Right: Sidebar (Ticket details) -->
 				<aside class="w-full lg:w-100">
 					<div
-						class="border-4 border-[#1a1a1a] bg-white shadow-[12px_12px_0_0_#1a1a1a] p-8 sticky top-28"
+						class="border-4 border-[#1a1a1a] bg-white shadow-[12px_12px_0_0_#1a1a1a] p-5 sm:p-8 lg:sticky top-28"
 					>
 						<h3
 							class="text-3xl font-black uppercase mb-4 border-b-4 border-[#1a1a1a]"
@@ -244,7 +244,7 @@ import { HeartIcon } from "@heroicons/vue/20/solid";
 						<div class="bg-gray-100 border-[3px] border-[#1a1a1a] p-2 mb-4">
 							<div class="flex justify-between items-center">
 								<span class="font-bold uppercase">General Admission</span>
-								<span class="font-black text-2xl">$45.00</span>
+								<span class="font-black text-xl sm:text-2xl">$45.00</span>
 							</div>
 						</div>
 

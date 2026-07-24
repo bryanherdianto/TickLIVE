@@ -54,7 +54,7 @@ const handleGoogleLogin = async () => {
 			>
 				<!-- Left Side: Visual/Branding -->
 				<div
-					class="lg:w-[58%] bg-[#ffcc00] border-b-[3px] lg:border-b-0 lg:border-r-[3px] border-black p-8 md:p-12 flex flex-col justify-between relative overflow-hidden"
+					class="lg:w-[58%] bg-[#ffcc00] border-b-[3px] lg:border-b-0 lg:border-r-[3px] border-black p-4 sm:p-8 md:p-12 flex flex-col justify-between relative overflow-hidden"
 				>
 					<!-- Abstract Background borders -->
 					<div
@@ -65,7 +65,7 @@ const handleGoogleLogin = async () => {
 					></div>
 
 					<!-- Content -->
-					<div class="relative z-10 w-full pt-4 font-['Space_Grotesk']">
+					<div class="relative z-10 w-full sm:pt-4 font-['Space_Grotesk']">
 						<div
 							class="inline-block bg-[#1a1a1a] text-[#ffcc00] text-xs font-bold px-3 py-1 mb-8 tracking-widest uppercase"
 						>
@@ -73,7 +73,7 @@ const handleGoogleLogin = async () => {
 						</div>
 
 						<h1
-							class="text-6xl md:text-[88px] font-black text-[#1a1a1a] leading-[0.9] tracking-tighter mb-40"
+							class="text-[45px] sm:text-6xl md:text-[88px] font-black text-[#1a1a1a] leading-[0.9] tracking-tighter mb-40"
 						>
 							FORM<br />
 							FOLLOWS<br />
@@ -95,7 +95,7 @@ const handleGoogleLogin = async () => {
 
 				<!-- Right Side: Form Section -->
 				<div
-					class="lg:w-[42%] bg-[#f5f0e8] p-8 md:p-16 flex flex-col justify-center font-['Space_Grotesk']"
+					class="lg:w-[42%] bg-[#f5f0e8] p-4 sm:p-8 md:p-16 flex flex-col justify-center font-['Space_Grotesk']"
 				>
 					<div class="mb-10">
 						<h2

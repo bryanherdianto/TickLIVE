@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from "vue";
 import Footer from "./Footer.vue";
 import Header from "./Header.vue";
 import {
@@ -13,6 +14,8 @@ import {
 	ViewfinderCircleIcon,
 	ChevronDownIcon,
 } from "@heroicons/vue/24/outline";
+
+const portalMenuOpen = ref(false);
 </script>
 
 <template>
@@ -26,37 +29,52 @@ import {
 		>
 			<!-- Sidebar Navigation -->
 			<aside
-				class="w-full lg:w-64 shrink-0 bg-[#f5f0e8] sticky self-start top-20 pb-12"
+				class="w-full lg:w-64 shrink-0 bg-[#f5f0e8] self-start lg:sticky top-20 border-b lg:border-b-0 lg:border-r border-[#1a1a1a]"
 			>
-				<div class="p-6 border-b border-[#1a1a1a]">
-					<h2 class="text-xl font-bold uppercase tracking-wider mb-1">
-						Venue_Portal
-					</h2>
-					<p class="text-xs font-bold text-gray-500">V.01-SPEC</p>
+				<div
+					class="p-4 lg:p-6 border-b border-[#1a1a1a] flex items-center justify-between gap-4"
+				>
+					<div>
+						<h2 class="text-xl font-bold uppercase tracking-wider mb-1">
+							Venue_Portal
+						</h2>
+						<p class="text-xs font-bold text-gray-500">V.01-SPEC</p>
+					</div>
+					<button
+						type="button"
+						class="lg:hidden flex items-center gap-2 border-2 border-[#1a1a1a] px-3 py-2 font-bold text-xs uppercase"
+						@click="portalMenuOpen = !portalMenuOpen"
+					>
+						Menu
+						<ChevronDownIcon
+							class="h-4 w-4 transition-transform duration-200"
+							:class="{ 'rotate-180': portalMenuOpen }"
+						/>
+					</button>
 				</div>
 				<nav
-					class="flex flex-row lg:flex-col pt-6 font-bold text-sm tracking-wide"
+					:class="[portalMenuOpen ? 'flex' : 'hidden', 'lg:flex flex-col pt-2 lg:pt-6 font-bold text-sm tracking-wide']"
 				>
 					<button
-						class="px-6 py-4 bg-[#ffcc00] border-y lg:border-y-0 lg:border-l-4 border-[#1a1a1a] text-left flex items-center gap-3"
+						class="px-4 lg:px-6 py-3 lg:py-4 bg-[#ffcc00] border-l-4 border-[#1a1a1a] text-left flex items-center gap-3"
 					>
 						<InformationCircleIcon class="h-5 w-5" />
 						OVERVIEW
 					</button>
 					<button
-						class="px-6 py-4 hover:bg-gray-100 text-gray-600 text-left flex items-center gap-3 transition-colors border-l-4 border-transparent"
+						class="px-4 lg:px-6 py-3 lg:py-4 hover:bg-gray-100 text-gray-600 text-left flex items-center gap-3 transition-colors border-l-4 border-transparent"
 					>
 						<AdjustmentsHorizontalIcon class="h-5 w-5" />
 						SPECS
 					</button>
 					<button
-						class="px-6 py-4 hover:bg-gray-100 text-gray-600 text-left flex items-center gap-3 transition-colors border-l-4 border-transparent"
+						class="px-4 lg:px-6 py-3 lg:py-4 hover:bg-gray-100 text-gray-600 text-left flex items-center gap-3 transition-colors border-l-4 border-transparent"
 					>
 						<PhotoIcon class="h-5 w-5" />
 						GALLERY
 					</button>
 					<button
-						class="px-6 py-4 hover:bg-gray-100 text-gray-600 text-left flex items-center gap-3 transition-colors border-l-4 border-transparent"
+						class="px-4 lg:px-6 py-3 lg:py-4 hover:bg-gray-100 text-gray-600 text-left flex items-center gap-3 transition-colors border-l-4 border-transparent"
 					>
 						<CalendarIcon class="h-5 w-5" />
 						SCHEDULE
@@ -68,11 +86,11 @@ import {
 			<div class="flex-1 min-w-0">
 				<!-- Hero Banner -->
 				<section
-					class="w-full relative min-h-125 border-b border-[#1a1a1a] flex"
+					class="w-full relative min-h-100 sm:min-h-125 border-b border-[#1a1a1a] flex"
 				>
 					<!-- Main Dark Area -->
 					<div
-						class="grow bg-[#111111] relative overflow-hidden flex flex-col justify-end p-10 lg:p-16"
+						class="grow bg-[#111111] relative overflow-hidden flex flex-col justify-end p-6 sm:p-10 lg:p-16"
 					>
 						<!-- Subtle background texture/image overlay -->
 						<div
@@ -92,7 +110,7 @@ import {
 								VENUE_042
 							</div>
 							<h1
-								class="text-6xl md:text-8xl lg:text-[110px] font-bold uppercase tracking-tighter leading-[0.85] text-[#ffcc00] mb-8"
+								class="text-4xl sm:text-6xl md:text-8xl lg:text-[110px] font-bold uppercase tracking-tighter leading-[0.85] text-[#ffcc00] mb-6 sm:mb-8"
 							>
 								The Concrete<br />Cathedral
 							</h1>
@@ -109,16 +127,16 @@ import {
 				</section>
 
 				<!-- Technical Specs -->
-				<section class="px-8 lg:px-16 pt-16 pb-12 border-b border-[#1a1a1a]">
+				<section class="px-4 sm:px-8 lg:px-16 pt-10 sm:pt-16 pb-8 sm:pb-12 border-b border-[#1a1a1a]">
 					<h2
-						class="text-4xl lg:text-5xl font-bold uppercase mb-10 inline-block border-b-4 border-[#1a1a1a] pb-1"
+						class="text-3xl sm:text-4xl lg:text-5xl font-bold uppercase mb-6 sm:mb-10 inline-block border-b-4 border-[#1a1a1a] pb-1"
 					>
 						Technical_Specs
 					</h2>
-					<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+					<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
 						<!-- Capacity -->
 						<div
-							class="bg-white border-[3px] border-[#1a1a1a] p-6 shadow-[6px_6px_0px_0px_#1a1a1a]"
+							class="bg-white border-[3px] border-[#1a1a1a] p-3 xl:p-6 shadow-[6px_6px_0px_0px_#1a1a1a]"
 						>
 							<div class="text-[#0055ff] mb-4">
 								<UserGroupIcon class="h-8 w-8" />
@@ -133,13 +151,13 @@ import {
 
 						<!-- Audio -->
 						<div
-							class="bg-[#1a1a1a] text-white border-[3px] border-[#1a1a1a] p-6 shadow-[6px_6px_0px_0px_#1a1a1a]"
+							class="bg-[#1a1a1a] text-white border-[3px] border-[#1a1a1a] p-3 xl:p-6 shadow-[6px_6px_0px_0px_#1a1a1a]"
 						>
 							<div class="text-[#ffcc00] mb-4">
 								<SpeakerWaveIcon class="h-8 w-8" />
 							</div>
-							<div class="text-2xl font-bold mb-1 leading-tight">
-								L-AKOUSTIK<br />K2
+							<div class="text-[20px] font-bold mb-1 leading-tight">
+								L-AKOSTIK K2
 							</div>
 							<div
 								class="text-xs font-bold uppercase tracking-widest text-[#ffcc00]"
@@ -150,12 +168,12 @@ import {
 
 						<!-- Lighting -->
 						<div
-							class="bg-white border-[3px] border-[#1a1a1a] p-6 shadow-[6px_6px_0px_0px_#1a1a1a]"
+							class="bg-white border-[3px] border-[#1a1a1a] p-3 xl:p-6 shadow-[6px_6px_0px_0px_#1a1a1a]"
 						>
 							<div class="text-[#e63b2e] mb-4">
 								<LightBulbIcon class="h-8 w-8" />
 							</div>
-							<div class="text-2xl font-bold mb-1 leading-tight">
+							<div class="text-[20px] font-bold mb-1 leading-tight">
 								GRANDMA3<br />FULL
 							</div>
 							<div
@@ -167,7 +185,7 @@ import {
 
 						<!-- Stage -->
 						<div
-							class="bg-[#ffcc00] border-[3px] border-[#1a1a1a] p-6 shadow-[6px_6px_0px_0px_#1a1a1a]"
+							class="bg-[#ffcc00] border-[3px] border-[#1a1a1a] p-3 xl:p-6 shadow-[6px_6px_0px_0px_#1a1a1a]"
 						>
 							<div class="text-[#1a1a1a] mb-4">
 								<ViewfinderCircleIcon class="h-8 w-8" />
@@ -183,29 +201,24 @@ import {
 				</section>
 
 				<!-- Visual Archive -->
-				<section class="px-8 lg:px-16 pt-16 pb-12 border-b border-[#1a1a1a]">
-					<div class="flex justify-between items-end mb-10">
+				<section class="px-4 sm:px-8 lg:px-16 pt-10 sm:pt-16 pb-8 sm:pb-12 border-b border-[#1a1a1a]">
+					<div class="flex justify-between items-end mb-6 sm:mb-10">
 						<h2
-							class="text-4xl lg:text-5xl font-bold uppercase border-b-4 border-[#e63b2e] pb-1"
+							class="text-3xl sm:text-4xl lg:text-5xl font-bold uppercase border-b-4 border-[#e63b2e] pb-1"
 						>
 							Visual_Archive
 						</h2>
-						<div
-							class="text-5xl lg:text-7xl font-bold text-[#1a1a1a] opacity-10 tracking-widest"
-						>
-							01 // 05
-						</div>
 					</div>
 
 					<!-- Image Grid -->
-					<div class="grid grid-cols-1 md:grid-cols-3 gap-4 h-auto md:h-150">
+					<div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 h-auto md:h-150">
 						<!-- Top Left Large -->
 						<div
 							class="md:col-span-2 bg-[#111111] overflow-hidden border-2 border-[#1a1a1a]"
 						>
 							<img
 								src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=1000&auto=format&fit=crop"
-								class="w-full h-75 md:h-full object-cover opacity-80"
+								class="w-full h-56 sm:h-75 md:h-full object-cover opacity-80"
 								alt="Concert Stage"
 							/>
 						</div>
@@ -216,7 +229,7 @@ import {
 						>
 							<img
 								src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=1000&auto=format&fit=crop"
-								class="w-full h-75 md:h-full object-cover"
+								class="w-full h-56 sm:h-75 md:h-full object-cover"
 								alt="Sound System"
 							/>
 						</div>
@@ -227,35 +240,39 @@ import {
 						>
 							<img
 								src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=1000&auto=format&fit=crop"
-								class="w-full h-75 md:h-full object-cover"
+								class="w-full h-56 sm:h-75 md:h-full object-cover"
 								alt="Stage Lights"
 							/>
 						</div>
 
 						<!-- Bottom Middle Numeric -->
 						<div
-							class="md:col-span-1 bg-[#ffcc00] flex items-center justify-center border-2 border-[#1a1a1a] h-75 md:h-full cursor-pointer hover:bg-yellow-300 transition-colors"
+							class="md:col-span-1 bg-[#111111] overflow-hidden border-2 border-[#1a1a1a]"
 						>
-							<span class="text-7xl font-bold">+14</span>
+							<img
+								src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=1000&auto=format&fit=crop"
+								class="w-full h-56 sm:h-75 md:h-full object-cover"
+								alt="Stage Lights"
+							/>
 						</div>
 					</div>
 				</section>
 
 				<!-- Scheduled Live -->
-				<section class="px-8 lg:px-16 pt-16 pb-20">
+				<section class="px-4 sm:px-8 lg:px-16 pt-10 sm:pt-16 pb-12 sm:pb-20">
 					<h2
-						class="text-4xl lg:text-5xl font-bold uppercase mb-10 inline-block border-b-4 border-[#0055ff] pb-1"
+						class="text-3xl sm:text-4xl lg:text-5xl font-bold uppercase mb-6 sm:mb-10 inline-block border-b-4 border-[#0055ff] pb-1"
 					>
 						Scheduled_Live
 					</h2>
 
-					<div class="flex flex-col gap-6">
+					<div class="flex flex-col gap-4 sm:gap-6">
 						<!-- Event Card 1 -->
 						<div
-							class="bg-white border-[3px] border-[#1a1a1a] p-6 shadow-[6px_6px_0px_0px_#1a1a1a] flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
+							class="bg-white border-[3px] border-[#1a1a1a] p-4 sm:p-6 shadow-[6px_6px_0px_0px_#1a1a1a] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6"
 						>
 							<div
-								class="flex flex-col md:flex-row items-start md:items-center gap-6 lg:gap-10"
+								class="flex flex-col md:flex-row items-start md:items-center gap-4 sm:gap-6 lg:gap-10"
 							>
 								<div
 									class="text-center md:border-r-2 border-[#1a1a1a] md:pr-8 min-w-25"
@@ -269,7 +286,7 @@ import {
 								</div>
 								<div>
 									<h3
-										class="text-2xl md:text-3xl font-bold uppercase tracking-tight mb-1"
+									class="text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-tight mb-1"
 									>
 										Neon_Minimalism Tour
 									</h3>
@@ -281,7 +298,7 @@ import {
 								</div>
 							</div>
 							<div
-								class="flex items-center gap-6 w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t-2 md:border-t-0 border-[#1a1a1a]"
+								class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 w-full md:w-auto mt-2 md:mt-0 pt-4 md:pt-0 border-t-2 md:border-t-0 border-[#1a1a1a]"
 							>
 								<div class="text-right">
 									<div
@@ -292,7 +309,7 @@ import {
 									<div class="text-xl font-bold">22:00</div>
 								</div>
 								<button
-									class="bg-[#1a1a1a] text-white px-8 py-4 font-bold tracking-widest text-sm uppercase hover:bg-black transition-colors ml-auto md:ml-0"
+									class="w-full sm:w-auto bg-[#1a1a1a] text-white px-5 sm:px-8 py-3 sm:py-4 font-bold tracking-widest text-xs sm:text-sm uppercase hover:bg-black transition-colors ml-0"
 								>
 									Get_Tickets
 								</button>
@@ -301,10 +318,10 @@ import {
 
 						<!-- Event Card 2 -->
 						<div
-							class="bg-white border-[3px] border-[#1a1a1a] p-6 shadow-[6px_6px_0px_0px_#1a1a1a] flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
+							class="bg-white border-[3px] border-[#1a1a1a] p-4 sm:p-6 shadow-[6px_6px_0px_0px_#1a1a1a] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6"
 						>
 							<div
-								class="flex flex-col md:flex-row items-start md:items-center gap-6 lg:gap-10"
+								class="flex flex-col md:flex-row items-start md:items-center gap-4 sm:gap-6 lg:gap-10"
 							>
 								<div
 									class="text-center md:border-r-2 border-[#1a1a1a] md:pr-8 min-w-25"
@@ -318,7 +335,7 @@ import {
 								</div>
 								<div>
 									<h3
-										class="text-2xl md:text-3xl font-bold uppercase tracking-tight mb-1"
+									class="text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-tight mb-1"
 									>
 										Synth_Wave Assembly
 									</h3>
@@ -330,7 +347,7 @@ import {
 								</div>
 							</div>
 							<div
-								class="flex items-center gap-6 w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t-2 md:border-t-0 border-[#1a1a1a]"
+								class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 w-full md:w-auto mt-2 md:mt-0 pt-4 md:pt-0 border-t-2 md:border-t-0 border-[#1a1a1a]"
 							>
 								<div class="text-right">
 									<div
@@ -341,57 +358,11 @@ import {
 									<div class="text-xl font-bold">21:30</div>
 								</div>
 								<button
-									class="bg-[#1a1a1a] text-white px-8 py-4 font-bold tracking-widest text-sm uppercase hover:bg-black transition-colors ml-auto md:ml-0"
+									class="w-full sm:w-auto bg-[#1a1a1a] text-white px-5 sm:px-8 py-3 sm:py-4 font-bold tracking-widest text-xs sm:text-sm uppercase hover:bg-black transition-colors ml-0"
 								>
 									Get_Tickets
 								</button>
 							</div>
-						</div>
-					</div>
-
-					<!-- Host Your Own Function Banner -->
-					<div
-						class="mt-16 bg-[#ffcc00] border-[3px] border-[#1a1a1a] p-8 md:p-12 shadow-[12px_12px_0px_0px_#1a1a1a] flex flex-col md:flex-row gap-8 lg:gap-16 items-center"
-					>
-						<div class="flex-1">
-							<h2
-								class="text-5xl lg:text-6xl font-bold uppercase tracking-tighter leading-tight mb-4"
-							>
-								Host Your<br />Own_Function.
-							</h2>
-							<p
-								class="font-['Inter'] text-lg font-medium text-[#1a1a1a] max-w-lg"
-							>
-								Our technical team and brutalist space are ready for
-								high-concept productions, private functions, and experimental
-								showcases.
-							</p>
-						</div>
-
-						<div class="w-full md:w-auto">
-							<label
-								class="block text-xs font-bold uppercase tracking-widest mb-1 text-[#1a1a1a]"
-								>Inquiry_Type</label
-							>
-							<div class="relative mb-6">
-								<select
-									class="w-full bg-transparent border-b-2 border-[#1a1a1a] py-3 px-2 text-xl font-bold uppercase tracking-wide appearance-none focus:outline-none cursor-pointer"
-								>
-									<option>Concert / Live</option>
-									<option>Corporate / Private</option>
-									<option>Photo / Video Shoot</option>
-								</select>
-								<div
-									class="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none"
-								>
-									<ChevronDownIcon class="h-6 w-6" />
-								</div>
-							</div>
-							<button
-								class="w-full bg-[#111111] text-white px-8 py-5 font-bold tracking-widest text-lg uppercase hover:bg-black transition-colors"
-							>
-								Send_Inquiry
-							</button>
 						</div>
 					</div>
 				</section>

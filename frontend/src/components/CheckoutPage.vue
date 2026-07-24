@@ -260,7 +260,7 @@ import { LockClosedIcon, LifebuoyIcon } from "@heroicons/vue/24/outline";
 								<div class="flex gap-2">
 									<input
 										type="text"
-										placeholder="Enter code"
+										placeholder="TEST123"
 										class="w-full px-3 py-2 border-2 border-[#1a1a1a] bg-white text-[#1a1a1a] placeholder-gray-400 font-['Space_Grotesk'] focus:outline-none"
 									/>
 									<button

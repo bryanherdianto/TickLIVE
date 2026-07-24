@@ -82,7 +82,7 @@ const handleGoogleLogin = async () => {
 					</div>
 
 					<h1
-						class="text-6xl md:text-[92px] font-black text-[#1a1a1a] leading-[0.9] tracking-tighter"
+						class="text-5xl sm:text-6xl md:text-[92px] font-black text-[#1a1a1a] leading-[0.9] tracking-tighter"
 					>
 						JOIN THE<br />
 						COLLECTIVE

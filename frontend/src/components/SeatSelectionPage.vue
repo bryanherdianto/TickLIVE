@@ -89,18 +89,18 @@ const getZoneColor = (zoneId, status) => {
 	>
 		<Header />
 
-		<main class="max-w-7xl mx-auto px-6 py-12">
-			<div class="flex flex-col lg:flex-row gap-8">
+		<main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+			<div class="flex flex-col lg:flex-row gap-6 sm:gap-8">
 				<!-- Left Column: Venue Map -->
-				<div class="flex-1 flex flex-col gap-8">
+				<div class="flex-1 flex flex-col gap-6 sm:gap-8">
 					<!-- Header Section -->
-					<div class="border-l-4 border-[#1a1a1a] pl-6 py-2">
+					<div class="border-l-4 border-[#1a1a1a] pl-4 sm:pl-6 py-1 sm:py-2">
 						<h1
-							class="text-5xl md:text-6xl font-bold uppercase tracking-tight mb-2"
+							class="text-4xl sm:text-5xl md:text-6xl font-bold uppercase tracking-tight mb-2"
 						>
 							Select Your Seats
 						</h1>
-						<h2 class="text-xl md:text-2xl text-[#0055ff] font-bold mb-4">
+						<h2 class="text-lg sm:text-xl md:text-2xl text-[#0055ff] font-bold mb-3 sm:mb-4">
 							{{ event.title }}
 						</h2>
 
@@ -120,18 +120,18 @@ const getZoneColor = (zoneId, status) => {
 
 					<!-- Stage and Map Container -->
 					<div
-						class="bg-[#eee9e0] border-[3px] border-[#1a1a1a] shadow-[8px_8px_0px_0px_#1a1a1a] p-8 mt-4 relative overflow-hidden"
+						class="bg-[#eee9e0] border-[3px] border-[#1a1a1a] shadow-[8px_8px_0px_0px_#1a1a1a] p-4 sm:p-6 md:p-8 mt-2 sm:mt-4 relative overflow-hidden"
 					>
 						<!-- Stage -->
 						<div
-							class="bg-[#1a1a1a] text-white text-center py-4 px-8 font-bold tracking-widest uppercase border-b-[6px] border-[#ffcc00] mt-16 mx-auto max-w-2xl transform perspective-1000 rotate-x-12 origin-bottom"
+							class="bg-[#1a1a1a] text-white text-center py-3 sm:py-4 px-4 sm:px-8 font-bold tracking-widest uppercase border-b-[6px] border-[#ffcc00] mt-0 md:mt-16 mx-auto max-w-2xl transform perspective-1000 rotate-x-12 origin-bottom"
 						>
 							STAGE
 						</div>
 
 						<!-- Legend -->
 						<div
-							class="flex flex-wrap justify-center gap-6 mb-12 bg-white/50 backdrop-blur border-2 border-[#1a1a1a] p-4 mx-auto absolute top-4 right-4"
+							class="relative md:absolute md:top-4 md:right-4 flex flex-wrap justify-start md:justify-center gap-3 sm:gap-6 mb-6 md:mb-12 bg-white/50 backdrop-blur border-2 border-[#1a1a1a] p-3 sm:p-4 mt-4 md:mt-0 w-full md:w-auto"
 						>
 							<div class="flex items-center gap-2">
 								<div
@@ -160,21 +160,21 @@ const getZoneColor = (zoneId, status) => {
 						</div>
 
 						<!-- Seat Map -->
-						<div class="flex flex-col gap-12 items-center pb-8 mt-12">
+						<div class="flex flex-col gap-8 sm:gap-12 items-center pb-4 sm:pb-8 mt-6 sm:mt-12">
 							<!-- Zone A: Premium -->
-							<div class="flex flex-col gap-4 items-center">
+							<div class="flex flex-col gap-3 sm:gap-4 items-center">
 								<h3
 									class="text-lg font-bold bg-white px-4 py-1 mb-2 border-2 border-[#1a1a1a] shadow-[2px_2px_0px_0px_#1a1a1a] -rotate-2"
 								>
 									Zone A: Premium
 								</h3>
-								<div class="flex flex-wrap justify-center gap-5 max-w-xl">
+								<div class="flex flex-wrap justify-center gap-3 sm:gap-5 max-w-xl">
 									<button
 										v-for="seat in seats.filter((s) => s.zone === 'A')"
 										:key="seat.id"
 										@click="toggleSeat(seat)"
 										:disabled="seat.status === 'booked'"
-										class="w-10 h-10 border-2 border-[#1a1a1a] transition-all duration-150 relative flex items-center justify-center group"
+										class="w-8 h-8 sm:w-10 sm:h-10 border-2 border-[#1a1a1a] transition-all duration-150 relative flex items-center justify-center group"
 										:class="[
 											isSelected(seat)
 												? 'bg-[#ffcc00] shadow-[0_0_0_2px_#1a1a1a_inset] scale-110 z-10'
@@ -198,19 +198,19 @@ const getZoneColor = (zoneId, status) => {
 							</div>
 
 							<!-- Zone B: General -->
-							<div class="flex flex-col gap-4 items-center mt-4">
+							<div class="flex flex-col gap-3 sm:gap-4 items-center mt-2 sm:mt-4">
 								<h3
 									class="text-lg font-bold bg-white px-4 py-1 mb-2 border-2 border-[#1a1a1a] shadow-[2px_2px_0px_0px_#1a1a1a] rotate-1"
 								>
 									Zone B: General
 								</h3>
-								<div class="flex flex-wrap justify-center gap-5 max-w-2xl">
+								<div class="flex flex-wrap justify-center gap-3 sm:gap-5 max-w-2xl">
 									<button
 										v-for="seat in seats.filter((s) => s.zone === 'B')"
 										:key="seat.id"
 										@click="toggleSeat(seat)"
 										:disabled="seat.status === 'booked'"
-										class="w-10 h-10 border-2 border-[#1a1a1a] transition-all duration-150 relative flex items-center justify-center group"
+										class="w-8 h-8 sm:w-10 sm:h-10 border-2 border-[#1a1a1a] transition-all duration-150 relative flex items-center justify-center group"
 										:class="[
 											isSelected(seat)
 												? 'bg-[#ffcc00] shadow-[0_0_0_2px_#1a1a1a_inset] scale-110 z-10'
@@ -237,10 +237,10 @@ const getZoneColor = (zoneId, status) => {
 				</div>
 
 				<!-- Right Column: Summary Sidebar -->
-				<aside class="w-full lg:w-96 flex flex-col gap-6">
+				<aside class="w-full lg:w-96 flex flex-col gap-4 sm:gap-6">
 					<!-- Selected Seats Card -->
 					<div
-						class="bg-[#1a1a1a] text-[#f5f0e8] border-[3px] border-[#1a1a1a] shadow-[8px_8px_0px_0px_#ffcc00] p-6"
+						class="bg-[#1a1a1a] text-[#f5f0e8] border-[3px] border-[#1a1a1a] shadow-[8px_8px_0px_0px_#ffcc00] p-4 sm:p-6"
 					>
 						<h2
 							class="text-2xl font-bold uppercase border-b-2 border-dashed border-gray-700 pb-4 mb-6"
@@ -330,19 +330,13 @@ const getZoneColor = (zoneId, status) => {
 								:disabled="selectedSeats.length === 0"
 							>
 								Checkout Now
-								<span
-									v-if="selectedSeats.length > 0"
-									class="absolute right-4 top-1/2 -translate-y-1/2 bg-[#1a1a1a] text-[#ffcc00] text-sm px-2 py-1 select-none pointer-events-none transform rotate-3"
-								>
-									HURRY!
-								</span>
 							</button>
 						</div>
 					</div>
 
 					<!-- Extra Info Card -->
 					<div
-						class="bg-[#f5f0e8] border-[3px] border-[#1a1a1a] shadow-[6px_6px_0px_0px_#1a1a1a] p-6 text-sm font-['Inter']"
+						class="bg-[#f5f0e8] border-[3px] border-[#1a1a1a] shadow-[6px_6px_0px_0px_#1a1a1a] p-4 sm:p-6 text-sm font-['Inter']"
 					>
 						<h3
 							class="font-['Space_Grotesk'] font-bold text-lg border-b-2 border-[#1a1a1a] pb-2 mb-4 flex items-center gap-2 uppercase"
