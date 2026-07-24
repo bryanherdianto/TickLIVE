@@ -1,76 +1,104 @@
-# **TickLIVE**
+# Tickify
 
-TickLIVE merupakan platform website yang dapat digunakan untuk membeli tiket dari event tertentu. Pengguna dapat membeli tiket dari event yang ingin dikunjungi serta dapat memilih posisi kursi yang diinginkan. Selain membeli tiket, website ini juga dapat dimanfaatkan oleh penyelenggara acara untuk menjual tiket dari acara yang diselenggarakan.
+Tickify is an event-ticketing platform where visitors can browse events, choose seats, and buy tickets. Event organizers can also publish their events.
 
-TickLIVE memanfaatkan beberapa API External seperti Clerk API untuk integrasi fitur Login, MidTrans API untuk integrasi fitur pembayaran, dan Google Maps API agar lokasi event dapat dicek secara langsung dari google maps.
+## Features and services
 
-Ketika memasuki halaman TickLIVE, pengguna dapat melihat-lihat tampilan awal dari website seperti list event yang tersedia. Akan tetapi, jika ingin memesan tiket atau mengadakan event, pengguna harus login terlebih dahulu. Dengan ini, pengguna dapat melihat-lihat website terlebih dahulu sebelum menggunakan fitur website secara penuh.
+- Authentication is provided by Clerk.
+- Event and ticket data is stored in PostgreSQL.
+- Venue images are uploaded to Cloudinary.
+- Venue maps use Leaflet with OpenStreetMap data. A Google Maps API key is **not** required.
 
-## **Contributors**
+## Project structure
 
-- Adi Nugroho (2306208546)
-- Aisya Rivelia Azzahra (2306161864)
-- Bryan Herdianto (2306210885)
-- Naufal Hadi Rasikhin (2306231366)
+```
+tick-live/
+├── backend/       # Express API and PostgreSQL access
+├── frontend/      # Vue 3 and Vite web application
+└── doc/           # Database dump and project diagrams
+```
 
-## **DIAGRAM**
+## Prerequisites
 
-### **UML**
+- Node.js 20.19 or later (or Node.js 22.12 or later) for the frontend
+- PostgreSQL database
+- A Clerk application
+- A Cloudinary account if venue image uploads are used
+
+## Environment variables
+
+Create the following files. Never commit real credentials.
+
+### Backend: `backend/.env`
+
+```env
+# Optional. Defaults to 3000.
+PORT=3000
+
+# PostgreSQL connection URI
+PG_CONNECTION_STRING=postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require
+
+# Required when creating or updating venue images
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+### Frontend: `frontend/.env`
+
+```env
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+```
+
+Leaflet and OpenStreetMap do not require a map API key for the basic map display. For production, follow the [OpenStreetMap tile usage policy](https://operations.osmfoundation.org/policies/tiles/) or use a dedicated tile provider if traffic becomes substantial.
+
+## Installation and local development
+
+Install the dependencies for each application separately:
+
+```sh
+cd backend
+npm install
+
+cd ../frontend
+npm install
+```
+
+Start the backend from the `backend` directory:
+
+```sh
+node index.js
+```
+
+Start the frontend from the `frontend` directory in a separate terminal:
+
+```sh
+npm run dev
+```
+
+The backend listens on port `3000` by default. The frontend development server prints its local URL after it starts.
+
+## Database
+
+An initial PostgreSQL dump is available at [`doc/dumpfile.sql`](doc/dumpfile.sql).
+
+## Project diagrams
+
+### UML
 
 ![UML](https://i.imgur.com/5ViikZR.png)
 
-### **ERD**
+### ERD
 
 ![ERD](https://i.imgur.com/YizUSKt.png)
 
-### **FLOWCHART**
+### Flowchart
 
-![FlowChart](https://i.imgur.com/gkXQoUj.png)
+![Flowchart](https://i.imgur.com/gkXQoUj.png)
 
-## INSTALLATION
+## Contributors
 
-- Melakukan Clone dari Repo
-
-```
-git clone https://github.com/bryanherdianto/TickLIVE.git
-```
-
-### Backend
-
-- Ganti ke direktori Backend
-
-```
-cd ticklive-backend
-```
-
-- Lakukan instalasi dependency
-
-```
-npm install
-```
-
-- Run Backend
-
-```
-npm run start
-```
-
-### Frontend
-
-- Ganti ke direktori frontend
-
-```
-cd ticklive-frontend
-```
-
-- Install Dependencies
-
-```
-npm install
-```
-
-- Run Frontend
-
-```
-npm run dev
-```
+- Adi Nugroho
+- Aisya Rivelia Azzahra
+- Bryan Herdianto
+- Naufal Hadi Rasikhin
