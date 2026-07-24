@@ -23,7 +23,10 @@ const currentYear = new Date().getFullYear();
 				</p>
 				<div class="flex gap-4">
 					<a
-						href="#"
+						href="https://x.com/herdiantob48589"
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label="Visit our X profile"
 						class="bg-[#f5f0e8] p-2 border-2 border-[#1a1a1a] hover:bg-gray-300 transition-colors"
 					>
 						<svg
@@ -37,7 +40,10 @@ const currentYear = new Date().getFullYear();
 						</svg>
 					</a>
 					<a
-						href="#"
+						href="https://www.instagram.com/bryan_herdianto"
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label="Visit our Instagram profile"
 						class="bg-[#f5f0e8] p-2 border-2 border-[#1a1a1a] hover:bg-gray-300 transition-colors"
 					>
 						<svg
@@ -53,61 +59,46 @@ const currentYear = new Date().getFullYear();
 				</div>
 			</div>
 
-			<div class="grid grid-cols-2 sm:grid-cols-3 gap-12 xl:gap-24">
+			<div class="grid grid-cols-2 gap-12 xl:gap-24">
 				<div class="flex flex-col gap-4">
-					<h4 class="font-bold text-lg text-[#e63b2e] uppercase mb-1">
-						Product
-					</h4>
-					<a
-						href="#"
+					<h4 class="font-bold text-lg text-[#e63b2e] uppercase mb-1">Explore</h4>
+					<RouterLink
+						to="/events"
 						class="font-bold text-sm text-[#f5f0e8] uppercase hover:underline"
-						>Privacy</a
+						>Events</RouterLink
 					>
-					<a
-						href="#"
+					<RouterLink
+						to="/venues"
 						class="font-bold text-sm text-[#f5f0e8] uppercase hover:underline"
-						>Terms</a
+						>Venues</RouterLink
 					>
-					<a
-						href="#"
+					<RouterLink
+						to="/tickets"
 						class="font-bold text-sm text-[#f5f0e8] uppercase hover:underline"
-						>API</a
+						>Tickets</RouterLink
+					>
+					<RouterLink
+						to="/my-venues"
+						class="font-bold text-sm text-[#f5f0e8] uppercase hover:underline"
+						>My Venues</RouterLink
+					>
+					<RouterLink
+						to="/my-events"
+						class="font-bold text-sm text-[#f5f0e8] uppercase hover:underline"
+						>My Events</RouterLink
 					>
 				</div>
 				<div class="flex flex-col gap-4">
-					<h4 class="font-bold text-lg text-[#05f] uppercase mb-1">Company</h4>
-					<a
-						href="#"
+					<h4 class="font-bold text-lg text-[#05f] uppercase mb-1">Account</h4>
+					<RouterLink
+						to="/login"
 						class="font-bold text-sm text-[#f5f0e8] uppercase hover:underline"
-						>Press</a
+						>Sign In</RouterLink
 					>
-					<a
-						href="#"
+					<RouterLink
+						to="/register"
 						class="font-bold text-sm text-[#f5f0e8] uppercase hover:underline"
-						>Careers</a
-					>
-					<a
-						href="#"
-						class="font-bold text-sm text-[#f5f0e8] uppercase hover:underline"
-						>About</a
-					>
-				</div>
-				<div class="flex flex-col gap-4">
-					<h4 class="font-bold text-lg text-[#fc0] uppercase mb-1">Help</h4>
-					<a
-						href="#"
-						class="font-bold text-sm text-[#f5f0e8] uppercase hover:underline"
-						>Support</a
-					>
-					<a
-						href="#"
-						class="font-bold text-sm text-[#f5f0e8] uppercase hover:underline"
-						>Safety</a
-					>
-					<a
-						href="#"
-						class="font-bold text-sm text-[#f5f0e8] uppercase hover:underline"
-						>Partners</a
+						>Create Account</RouterLink
 					>
 				</div>
 			</div>

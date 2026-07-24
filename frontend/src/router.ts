@@ -9,6 +9,8 @@ import VenueDetailsPage from "./components/VenueDetailsPage.vue";
 import TicketsPage from "./components/TicketsPage.vue";
 import LoginPage from "./components/LoginPage.vue";
 import RegisterPage from "./components/RegisterPage.vue";
+import MyEventsPage from "./components/MyEventsPage.vue";
+import MyVenuesPage from "./components/MyVenuesPage.vue";
 
 const routes = [
 	{ path: "/", name: "home", component: HomePage },
@@ -23,6 +25,8 @@ const routes = [
 	},
 	{ path: "/checkout", name: "checkout", component: CheckoutPage },
 	{ path: "/tickets", name: "my-tickets", component: TicketsPage },
+	{ path: "/my-events", name: "my-events", component: MyEventsPage },
+	{ path: "/my-venues", name: "my-venues", component: MyVenuesPage },
 	{ path: "/login", name: "login", component: LoginPage },
 	{ path: "/register", name: "register", component: RegisterPage },
 ];

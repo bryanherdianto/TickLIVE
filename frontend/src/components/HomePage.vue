@@ -11,17 +11,11 @@ import {
 import Footer from "./Footer.vue";
 import Header from "./Header.vue";
 
-// Images from Figma
-const imgHeroBg =
-	"https://www.figma.com/api/mcp/asset/8213cb1b-12b6-4212-9878-2b67242f777b";
-const imgTrending1 =
-	"https://www.figma.com/api/mcp/asset/2e1b4eee-92bf-491e-abcd-ec1b79af755f";
-const imgTrending2 =
-	"https://www.figma.com/api/mcp/asset/24380339-a3ad-4492-bd41-62cf8e359851";
-const imgTrending3 =
-	"https://www.figma.com/api/mcp/asset/06b9d604-bcdf-467a-bfd9-0fd32c62915d";
-const imgVenue =
-	"https://www.figma.com/api/mcp/asset/7361af5d-398b-47e3-9b01-100b0cb18245";
+const imgHeroBg = "/public/imgHeroBg.webp";
+const imgTrending1 = "/public/imgTrending1.webp";
+const imgTrending2 = "/public/imgTrending2.webp";
+const imgTrending3 = "/public/imgTrending3.webp";
+const imgVenue = "/public/imgVenue.webp";
 </script>
 
 <template>
@@ -30,14 +24,14 @@ const imgVenue =
 
 		<!-- Hero Section -->
 		<section
-			class="max-w-360 mx-auto w-full px-6 pt-6 pb-24 relative overflow-hidden font-['Space_Grotesk']"
+			class="max-w-360 mx-auto w-full px-4 sm:px-6 pt-4 sm:pt-6 pb-16 sm:pb-24 relative overflow-hidden font-['Space_Grotesk']"
 		>
-			<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 min-h-124">
+			<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 lg:min-h-124">
 				<!-- Left: Text content -->
-				<div class="lg:col-span-7 flex flex-col justify-center gap-8 z-10">
-					<div class="relative h-64 flex flex-col justify-center">
+				<div class="lg:col-span-7 flex flex-col justify-center gap-6 lg:gap-8 z-10">
+					<div class="relative h-48 sm:h-64 flex flex-col justify-center">
 						<h1
-							class="text-7xl md:text-[128px] leading-none font-bold tracking-tighter uppercase whitespace-nowrap"
+							class="text-6xl sm:text-[128px] leading-none font-bold tracking-tighter uppercase whitespace-nowrap"
 						>
 							FIND YOUR
 						</h1>
@@ -51,7 +45,7 @@ const imgVenue =
 					</div>
 
 					<div
-						class="border-l-8 border-[#05f] pl-8 max-w-xl font-['Inter'] pt-8 lg:pt-0"
+						class="border-l-8 border-[#05f] pl-5 sm:pl-8 max-w-xl font-['Inter'] pt-4 lg:pt-0"
 					>
 						<p class="font-bold text-2xl leading-relaxed">
 							The ultimate destination for sound, soul, and subculture. Get
@@ -60,34 +54,36 @@ const imgVenue =
 					</div>
 
 					<div class="flex flex-wrap gap-4 pt-2">
-						<button
+						<RouterLink
+							to="/events"
 							class="bg-[#1a1a1a] border-4 border-[#1a1a1a] shadow-[8px_8px_0px_0px_#1a1a1a] px-9 py-5 text-white font-bold text-2xl uppercase hover:-translate-y-1 transition-transform"
 						>
 							Browse All Events
-						</button>
-						<button
+						</RouterLink>
+						<RouterLink
+							to="/login"
 							class="bg-[#f5f0e8] border-4 border-[#1a1a1a] shadow-[8px_8px_0px_0px_#1a1a1a] px-9 py-5 font-bold text-2xl uppercase hover:-translate-y-1 transition-transform"
 						>
 							Host Event
-						</button>
+						</RouterLink>
 					</div>
 				</div>
 
 				<!-- Right: Image -->
 				<div
-					class="lg:col-span-5 relative flex items-center justify-center pt-16 lg:pt-0"
+					class="lg:col-span-5 relative flex items-center justify-center pt-8 sm:pt-12 lg:pt-0"
 				>
 					<div
 						class="bg-[#05f] border-4 border-[#1a1a1a] shadow-[8px_8px_0px_0px_#1a1a1a] w-full p-1 relative z-0"
 					>
-						<div
-							class="relative h-100 md:h-119 w-full bg-cover bg-center grayscale mix-blend-luminosity"
-							:style="{ backgroundImage: 'url(' + imgHeroBg + ')' }"
-						></div>
+					<div
+						class="relative aspect-[4/5] md:aspect-auto md:h-119 w-full bg-cover bg-center grayscale mix-blend-luminosity"
+						:style="{ backgroundImage: 'url(' + imgHeroBg + ')' }"
+					></div>
 					</div>
 					<!-- Decorative element -->
 					<div
-						class="absolute -bottom-6 -left-6 bg-[#fc0] border-4 border-[#1a1a1a] p-5 z-10"
+						class="absolute -bottom-6 left-0 sm:-left-6 bg-[#fc0] border-4 border-[#1a1a1a] p-5 z-10"
 					>
 						<div class="font-bold text-4xl uppercase whitespace-nowrap">
 							LIVE NOW
@@ -112,7 +108,7 @@ const imgVenue =
 					/></span>
 					<input
 						type="text"
-						placeholder="Where are you going?"
+						placeholder="Where to go?"
 						class="bg-transparent outline-none w-full text-lg font-bold text-[#6b7280] uppercase placeholder:text-gray-500"
 					/>
 				</div>
@@ -123,8 +119,8 @@ const imgVenue =
 						><CalendarIcon class="w-6 h-6"
 					/></span>
 					<input
-						type="text"
-						placeholder="Pick a date"
+						type="date"
+						aria-label="Pick a date"
 						class="bg-transparent outline-none w-full text-lg font-bold text-[#6b7280] uppercase placeholder:text-gray-500"
 					/>
 				</div>
@@ -234,11 +230,6 @@ const imgVenue =
 							Trending Now
 						</h2>
 					</div>
-					<button
-						class="bg-[#1a1a1a] border-2 border-[#1a1a1a] px-6 py-2.5 text-white font-bold text-base uppercase hover:bg-gray-800 transition-colors"
-					>
-						View All Events
-					</button>
 				</div>
 
 				<div
@@ -260,7 +251,9 @@ const imgVenue =
 								>
 							</div>
 						</div>
-						<div class="p-8 pb-4 flex flex-col gap-4 bg-[#f5f0e8] z-20">
+						<div
+							class="p-5 pb-4 sm:p-8 sm:pb-4 flex flex-col gap-4 bg-[#f5f0e8] z-20"
+						>
 							<h3 class="font-bold text-4xl uppercase leading-tight">
 								Industrial Techno Night: Voids
 							</h3>
@@ -276,24 +269,26 @@ const imgVenue =
 									<span class="font-bold text-base uppercase">From €45</span>
 								</div>
 							</div>
-							<button
+							<RouterLink
+								to="/events"
 								class="bg-[#1a1a1a] border-2 border-[#1a1a1a] mt-4 w-full py-4 text-center font-bold text-2xl text-white uppercase hover:bg-gray-800 transition-colors"
 							>
 								Grab Tickets
-							</button>
+							</RouterLink>
 						</div>
 					</div>
 
-					<div
-						class="lg:col-span-2 bg-[#f5f0e8] border-4 border-[#1a1a1a] shadow-[4px_4px_0px_0px_#1a1a1a] p-1 flex flex-col sm:flex-row group overflow-hidden cursor-pointer hover:-translate-y-1 transition-transform"
-					>
-						<div class="sm:w-50 h-50 bg-[#e63b2e] relative">
+					<RouterLink to="/events" class="block lg:col-span-2">
+						<div
+							class="bg-[#f5f0e8] border-4 border-[#1a1a1a] shadow-[4px_4px_0px_0px_#1a1a1a] p-1 flex flex-col sm:flex-row group overflow-hidden cursor-pointer hover:-translate-y-1 transition-transform"
+						>
+						<div class="sm:w-50 bg-[#e63b2e] relative">
 							<div
 								class="absolute inset-0 bg-cover bg-center grayscale mix-blend-luminosity"
 								:style="{ backgroundImage: 'url(' + imgTrending2 + ')' }"
 							></div>
 						</div>
-						<div class="flex-1 p-6 flex flex-col justify-between">
+						<div class="flex-1 p-4 sm:p-6 flex flex-col justify-between">
 							<div>
 								<span
 									class="bg-[#fc0] border-2 border-[#1a1a1a] px-2 py-1 text-xs font-bold uppercase mb-2 inline-block"
@@ -313,18 +308,20 @@ const imgVenue =
 								<span class="text-xl">➔</span>
 							</div>
 						</div>
-					</div>
+						</div>
+					</RouterLink>
 
-					<div
-						class="lg:col-span-2 bg-[#f5f0e8] border-4 border-[#1a1a1a] shadow-[4px_4px_0px_0px_#1a1a1a] p-1 flex flex-col sm:flex-row group overflow-hidden cursor-pointer hover:-translate-y-1 transition-transform"
-					>
-						<div class="sm:w-50 h-50 bg-[#05f] relative">
+					<RouterLink to="/events" class="block lg:col-span-2">
+						<div
+							class="bg-[#f5f0e8] border-4 border-[#1a1a1a] shadow-[4px_4px_0px_0px_#1a1a1a] p-1 flex flex-col sm:flex-row group overflow-hidden cursor-pointer hover:-translate-y-1 transition-transform"
+						>
+						<div class="sm:w-50 bg-[#05f] relative">
 							<div
 								class="absolute inset-0 bg-cover bg-center grayscale mix-blend-luminosity"
 								:style="{ backgroundImage: 'url(' + imgTrending3 + ')' }"
 							></div>
 						</div>
-						<div class="flex-1 p-6 flex flex-col justify-between">
+						<div class="flex-1 p-4 sm:p-6 flex flex-col justify-between">
 							<div>
 								<span
 									class="bg-[#05f] text-white border-2 border-[#1a1a1a] px-2 py-1 text-xs font-bold uppercase mb-2 inline-block"
@@ -344,7 +341,8 @@ const imgVenue =
 								<span class="text-xl">➔</span>
 							</div>
 						</div>
-					</div>
+						</div>
+					</RouterLink>
 				</div>
 			</div>
 		</section>
@@ -375,11 +373,12 @@ const imgVenue =
 							underground acoustics space. Raw walls, pristine sound.
 						</p>
 					</div>
-					<button
+					<RouterLink
+						to="/venues"
 						class="bg-white border-4 border-white text-[#1a1a1a] px-9 py-5 font-bold text-2xl uppercase self-start hover:bg-gray-200 transition-colors"
 					>
 						Explore Venue
-					</button>
+					</RouterLink>
 				</div>
 
 				<div
@@ -420,22 +419,6 @@ const imgVenue =
 				>
 					Get the secret codes for underground events delivered weekly.
 				</p>
-				<div class="w-full max-w-2xl flex flex-col sm:flex-row gap-4">
-					<div
-						class="bg-[#f5f0e8] border-4 border-[#1a1a1a] flex-1 min-h-16 px-5 flex items-center"
-					>
-						<input
-							type="email"
-							placeholder="YOUR EMAIL ADDRESS"
-							class="bg-transparent outline-none w-full font-bold text-lg md:text-xl uppercase placeholder:text-[#1a1a1a]/40"
-						/>
-					</div>
-					<button
-						class="bg-[#e63b2e] border-4 border-[#1a1a1a] px-10 py-4 font-bold text-2xl text-white uppercase hover:bg-red-600 transition-colors shrink-0"
-					>
-						JOIN NOW
-					</button>
-				</div>
 			</div>
 		</section>
 

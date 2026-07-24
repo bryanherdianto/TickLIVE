@@ -20,7 +20,6 @@ const events = [
 		date: "OCT 24",
 		title: ["Digital Pulse:", "Berlin", "Underground"],
 		location: "KRAFTWERK, BERLIN",
-		buttonText: "Get Tickets",
 	},
 	{
 		id: 2,
@@ -33,7 +32,6 @@ const events = [
 		date: "NOV 12-14",
 		title: ["Future", "Intelligence", "Summit 2024"],
 		location: "THE HUB, LONDON",
-		buttonText: "Register Now",
 	},
 	{
 		id: 3,
@@ -46,7 +44,6 @@ const events = [
 		date: "DEC 05",
 		title: ["Form &", "Function:", "Bauhaus", "Today"],
 		location: "MET MODERN, NYC",
-		buttonText: "RSVP Here",
 	},
 	{
 		id: 4,
@@ -59,7 +56,6 @@ const events = [
 		date: "OCT 29",
 		title: ["Urban Dunk", "Championship", "2024"],
 		location: "CITY ARENA, CHICAGO",
-		buttonText: "Book Seat",
 	},
 	{
 		id: 5,
@@ -72,7 +68,6 @@ const events = [
 		date: "AUG 15-18",
 		title: ["Solaris", "Soundscapes", "Festival"],
 		location: "THE VALLEY, CALIFORNIA",
-		buttonText: "Buy Pass",
 	},
 	{
 		id: 6,
@@ -85,7 +80,6 @@ const events = [
 		date: "NOV 03",
 		title: ["Creative", "Founders", "Meetup"],
 		location: "SKYLINE LOUNGE, TOKYO",
-		buttonText: "Grab Spot",
 	},
 ];
 
@@ -367,7 +361,7 @@ const categories = ["MUSIC", "TECH", "ARTS", "SPORTS"];
 									<button
 										class="w-full border-2 border-[#1a1a1a] border-solid py-3.5 font-bold text-[#1a1a1a] text-base uppercase hover:bg-[#1a1a1a] hover:text-white transition-colors duration-200"
 									>
-										{{ event.buttonText }}
+										Get Tickets
 									</button>
 								</div>
 							</div>
