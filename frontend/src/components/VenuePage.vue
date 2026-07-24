@@ -94,7 +94,7 @@ const filters = ["All Spaces", "Industrial", "Open Air", "Experimental"];
 					class="lg:w-7/12 p-8 lg:p-12 border-b-2 lg:border-b-0 lg:border-r-2 border-[#1a1a1a]"
 				>
 					<h1
-						class="text-6xl lg:text-8xl font-black uppercase leading-none mb-8 tracking-tighter"
+						class="text-5xl sm:text-6xl lg:text-8xl font-black uppercase leading-none mb-8 tracking-tighter"
 					>
 						Space<br /><span class="text-[#e63b2e]">Defined.</span>
 					</h1>
@@ -121,7 +121,7 @@ const filters = ["All Spaces", "Industrial", "Open Air", "Experimental"];
 					class="lg:w-5/12 relative h-64 lg:h-auto overflow-hidden bg-[#0055ff]"
 				>
 					<img
-						src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1200&auto=format&fit=crop"
+						src="/imgVenueHero.webp"
 						class="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500 opacity-80"
 						alt="Venue Hero"
 					/>
@@ -160,19 +160,6 @@ const filters = ["All Spaces", "Industrial", "Open Air", "Experimental"];
 							{{ filter }}
 						</button>
 					</div>
-
-					<!-- Sort Bar -->
-					<div class="flex items-center gap-4">
-						<span class="font-black uppercase text-sm">Sort By:</span>
-						<div class="relative min-w-50">
-							<button
-								class="w-full flex items-center justify-between bg-white border-2 border-[#1a1a1a] px-4 py-2 font-bold focus:outline-none"
-							>
-								Capacity: High to Low
-								<ChevronDownIcon class="w-5 h-5 ml-2" />
-							</button>
-						</div>
-					</div>
 				</div>
 			</section>
 
@@ -204,12 +191,12 @@ const filters = ["All Spaces", "Industrial", "Open Air", "Experimental"];
 					</div>
 
 					<!-- Card Content -->
-					<div class="p-6 flex flex-col grow">
-						<div class="flex justify-between items-start mb-6">
-							<h3 class="text-3xl font-black leading-none uppercase pr-4">
+					<div class="p-4 sm:p-6 flex flex-col grow">
+						<div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-6">
+							<h3 class="text-3xl font-black leading-none uppercase sm:pr-4 break-words">
 								{{ venue.name }}
 							</h3>
-							<div class="text-right">
+							<div class="text-left sm:text-right shrink-0">
 								<p class="text-[10px] uppercase font-black opacity-60">
 									Capacity
 								</p>
@@ -233,17 +220,17 @@ const filters = ["All Spaces", "Industrial", "Open Air", "Experimental"];
 
 						<!-- Footer Details -->
 						<div
-							class="mt-auto pt-6 border-t-2 border-[#1a1a1a]/10 flex items-center justify-between"
+							class="mt-auto pt-6 border-t-2 border-[#1a1a1a]/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4"
 						>
 							<div
-								class="flex items-center gap-1.5 bg-[#ffcc00] border-2 border-[#1a1a1a] px-2 py-0.5 shadow-[2px_2px_0_0_#1a1a1a]"
+								class="self-start flex items-center gap-1.5 bg-[#ffcc00] border-2 border-[#1a1a1a] px-2 py-0.5 shadow-[2px_2px_0_0_#1a1a1a]"
 							>
 								<StarIcon class="w-4 h-4" />
 								<span class="font-black text-sm">{{ venue.rating }}</span>
 							</div>
 
 							<button
-								class="bg-[#1a1a1a] text-white px-4 py-2 font-black uppercase text-sm hover:bg-[#0055ff] transition-colors flex items-center group/btn"
+								class="w-full sm:w-auto justify-center bg-[#1a1a1a] text-white px-4 py-2 font-black uppercase text-sm hover:bg-[#0055ff] transition-colors flex items-center group/btn"
 							>
 								View Details
 								<ArrowRightIcon
@@ -256,12 +243,12 @@ const filters = ["All Spaces", "Industrial", "Open Air", "Experimental"];
 			</section>
 
 			<!-- Load More / Pagination -->
-			<section class="flex justify-center pt-16 pb-24">
+			<section class="flex justify-center py-8">
 				<button
-					class="group relative inline-block bg-[#1a1a1a] px-12 py-4 shadow-[8px_8px_0_0_#ffcc00] hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
+					class="group relative inline-block bg-[#1a1a1a] px-10 sm:px-12 py-4 shadow-[8px_8px_0_0_#ffcc00] hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
 				>
 					<span
-						class="relative font-black text-white uppercase text-xl flex items-center"
+						class="relative font-black text-white uppercase text-sm sm:text-xl flex items-center"
 					>
 						Load More Spaces
 						<ArrowRightIcon class="w-6 h-6 ml-3" />

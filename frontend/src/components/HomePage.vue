@@ -11,11 +11,11 @@ import {
 import Footer from "./Footer.vue";
 import Header from "./Header.vue";
 
-const imgHeroBg = "/public/imgHeroBg.webp";
-const imgTrending1 = "/public/imgTrending1.webp";
-const imgTrending2 = "/public/imgTrending2.webp";
-const imgTrending3 = "/public/imgTrending3.webp";
-const imgVenue = "/public/imgVenue.webp";
+const imgHeroBg = "/imgHeroBg.webp";
+const imgTrending1 = "/imgTrending1.webp";
+const imgTrending2 = "/imgTrending2.webp";
+const imgTrending3 = "/imgTrending3.webp";
+const imgVenue = "/imgVenue.webp";
 </script>
 
 <template>

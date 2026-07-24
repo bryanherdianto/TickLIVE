@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from "vue";
 import {
 	MapPinIcon,
 	ChevronDownIcon,
@@ -84,6 +85,7 @@ const events = [
 ];
 
 const categories = ["MUSIC", "TECH", "ARTS", "SPORTS"];
+const filtersOpen = ref(false);
 </script>
 
 <template>
@@ -91,38 +93,41 @@ const categories = ["MUSIC", "TECH", "ARTS", "SPORTS"];
 		<Header />
 
 		<div
-			class="content-stretch flex items-start pt-24 relative shrink-0 w-full"
+			class="content-stretch flex flex-col lg:flex-row items-stretch lg:items-start pt-4 sm:pt-6 relative shrink-0 w-full"
 		>
 			<!-- Sidebar (Filters) -->
 			<aside
-				class="bg-[#f5f0e8] border-[#1a1a1a] border-r-4 border-solid flex flex-col items-start justify-between pl-8 pr-9 py-8 relative shrink-0 w-80"
+				class="bg-[#f5f0e8] border-[#1a1a1a] lg:border-r-4 border-solid flex flex-col items-start px-4 py-4 lg:pl-8 lg:pr-9 lg:py-8 relative shrink-0 w-full lg:w-80"
 			>
-				<div class="relative shrink-0 w-full">
-					<div
-						class="content-stretch flex flex-col items-start pb-10 relative w-full"
-					>
-						<div
-							class="content-stretch flex flex-col gap-2 items-start relative shrink-0 w-full"
-						>
-							<h2
+				<input
+					id="event-filters"
+					v-model="filtersOpen"
+					type="checkbox"
+					class="sr-only lg:hidden"
+				/>
+				<label
+					for="event-filters"
+					class="lg:hidden flex items-center justify-between w-full cursor-pointer border-2 border-[#1a1a1a] px-4 py-3 font-bold text-lg uppercase"
+				>
+					<h2
 								class="font-bold leading-8 text-[#1a1a1a] text-2xl uppercase m-0"
 							>
 								Filters
 							</h2>
-							<p
-								class="font-['Inter'] font-bold leading-4 text-[#4a4a4a] text-xs uppercase m-0"
-							>
-								Refine your search
-							</p>
-						</div>
-					</div>
+					<ChevronDownIcon
+						class="size-6 transition-transform duration-200"
+						:class="{ 'rotate-180': filtersOpen }"
+					/>
+				</label>
 
+				<div :class="[filtersOpen ? 'flex' : 'hidden', 'lg:flex flex-col w-full']">
+				<div class="relative shrink-0 w-full">
 					<div
 						class="content-stretch flex flex-col gap-8 items-start relative w-full"
 					>
 						<!-- Category Filter -->
 						<div
-							class="content-stretch flex flex-col gap-4 items-start relative shrink-0 w-full"
+							class="content-stretch flex flex-col gap-4 items-start relative shrink-0 w-full pt-4"
 						>
 							<div
 								class="border-[#1a1a1a] border-b-2 border-solid content-stretch flex flex-col items-start pb-2.5 relative shrink-0 w-full"
@@ -244,21 +249,22 @@ const categories = ["MUSIC", "TECH", "ARTS", "SPORTS"];
 					</div>
 				</div>
 
-				<div class="flex-[1_0_0] min-h-14 relative w-full pt-6">
+				<div class="relative w-full pt-6">
 					<button
 						class="bg-[#1a1a1a] flex flex-col items-center justify-center py-4 w-full font-bold text-base text-white uppercase hover:bg-black/80 transition-colors duration-200"
 					>
 						Clear All
 					</button>
 				</div>
+				</div>
 			</aside>
 
 			<!-- Main Content -->
 			<main
-				class="content-stretch flex flex-[1_0_0] flex-col items-start p-10 relative self-stretch"
+				class="content-stretch flex flex-1 flex-col items-start p-4 sm:p-6 lg:p-10 relative self-stretch w-full min-w-0"
 			>
 				<div
-					class="content-stretch flex flex-col gap-12 items-start max-w-5xl relative shrink-0 w-full mx-auto"
+					class="content-stretch flex flex-col gap-8 sm:gap-12 items-start max-w-5xl relative shrink-0 w-full mx-auto"
 				>
 					<div
 						class="content-stretch flex items-end justify-between relative shrink-0 w-full"
@@ -267,28 +273,16 @@ const categories = ["MUSIC", "TECH", "ARTS", "SPORTS"];
 							class="content-stretch flex flex-col gap-4 items-start relative shrink-0"
 						>
 							<h1
-								class="font-bold leading-tight text-[#1a1a1a] text-8xl tracking-tighter uppercase m-0"
+								class="font-bold leading-tight text-[#1a1a1a] text-5xl sm:text-7xl lg:text-8xl tracking-tighter uppercase m-0"
 							>
 								Events
 							</h1>
-							<p
-								class="font-bold leading-7 text-[#e63b2e] text-xl uppercase underline m-0"
-							>
-								74 Active Experiences Found
-							</p>
 						</div>
-
-						<button
-							class="bg-transparent border-4 border-[#1a1a1a] border-solid flex gap-2 items-center px-7 py-4 shadow-[4px_4px_0px_0px_#1a1a1a] font-bold text-[#1a1a1a] text-base uppercase hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_#1a1a1a] transition-all duration-200 active:translate-y-1 active:shadow-none"
-						>
-							<span class="leading-6">Sort: Relevant</span>
-							<ChevronDownIcon class="h-5 w-5" stroke-width="2.5" />
-						</button>
 					</div>
 
 					<!-- Events Bento Grid -->
 					<div
-						class="gap-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 relative shrink-0 w-full"
+						class="gap-5 sm:gap-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 relative shrink-0 w-full"
 					>
 						<div
 							v-for="event in events"
@@ -297,7 +291,7 @@ const categories = ["MUSIC", "TECH", "ARTS", "SPORTS"];
 						>
 							<!-- Event Image & Badges -->
 							<div
-								class="border-[#1a1a1a] border-b-4 border-solid h-64 relative shrink-0 w-full z-10 overflow-hidden"
+								class="border-[#1a1a1a] border-b-4 border-solid h-52 sm:h-64 relative shrink-0 w-full z-10 overflow-hidden"
 							>
 								<img
 									:src="event.image"
