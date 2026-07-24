@@ -11,33 +11,50 @@ const router = useRouter();
 const email = ref("");
 const password = ref("");
 const errorMessage = ref("");
+const isSubmitting = ref(false);
+
+const getClerkErrorMessage = (error) =>
+	error?.errors?.[0]?.longMessage ||
+	error?.errors?.[0]?.message ||
+	"Unable to sign in. Please try again.";
 
 const handleLogin = async () => {
-	if (!isLoaded.value) return;
+	if (!isLoaded.value || !signIn.value || !setActive.value) return;
+	errorMessage.value = "";
+	isSubmitting.value = true;
 
 	try {
-		const result = await signIn.create({
+		const result = await signIn.value.create({
 			identifier: email.value,
 			password: password.value,
 		});
 
 		if (result.status === "complete") {
-			await setActive({ session: result.createdSessionId });
+			await setActive.value({ session: result.createdSessionId });
 			router.push("/");
+		} else {
+			errorMessage.value = "Additional verification is required to sign in.";
 		}
 	} catch (error) {
-		errorMessage.value = error.errors[0].message;
+		errorMessage.value = getClerkErrorMessage(error);
+	} finally {
+		isSubmitting.value = false;
 	}
 };
 
 const handleGoogleLogin = async () => {
-	if (!isLoaded.value) return;
+	if (!isLoaded.value || !signIn.value) return;
+	errorMessage.value = "";
 
-	signIn.value.authenticateWithRedirect({
-		strategy: "oauth_google",
-		redirectUrl: "/sso-callback",
-		redirectUrlComplete: "/",
-	});
+	try {
+		await signIn.value.authenticateWithRedirect({
+			strategy: "oauth_google",
+			redirectUrl: "/sso-callback",
+			redirectUrlComplete: "/",
+		});
+	} catch (error) {
+		errorMessage.value = getClerkErrorMessage(error);
+	}
 };
 </script>
 
@@ -110,7 +127,7 @@ const handleGoogleLogin = async () => {
 						</p>
 					</div>
 
-					<form action="#" method="POST" class="space-y-6">
+					<form class="space-y-6" @submit.prevent="handleLogin">
 						<div>
 							<label
 								for="email"
@@ -136,12 +153,12 @@ const handleGoogleLogin = async () => {
 									class="block text-[#1a1a1a] text-xs font-bold tracking-wider uppercase"
 									>PASSWORD</label
 								>
-								<a
-									href="#"
+								<RouterLink
+									to="/forgot-password"
 									class="text-[#e63b2e] text-[10px] font-bold hover:text-[#cc2a1e] tracking-widest uppercase"
 								>
 									FORGOT ACCESS?
-								</a>
+								</RouterLink>
 							</div>
 							<div class="border-[1.5px] border-[#1a1a1a] bg-transparent p-0.5">
 								<input
@@ -155,12 +172,20 @@ const handleGoogleLogin = async () => {
 							</div>
 						</div>
 
+						<p
+							v-if="errorMessage"
+							role="alert"
+							class="border-2 border-[#e63b2e] bg-red-50 px-3 py-2 text-[#b42318] text-xs font-bold uppercase"
+						>
+							{{ errorMessage }}
+						</p>
+
 						<button
 							type="submit"
+							:disabled="isSubmitting || !isLoaded"
 							class="w-full bg-[#1a1a1a] text-white text-[15px] font-bold py-4 uppercase tracking-widest hover:bg-[#333333] transition-colors mt-4"
-							@click.prevent="handleLogin"
 						>
-							AUTHENTICATE
+							{{ isSubmitting ? "AUTHENTICATING..." : "AUTHENTICATE" }}
 						</button>
 					</form>
 

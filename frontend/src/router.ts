@@ -11,6 +11,8 @@ import LoginPage from "./components/LoginPage.vue";
 import RegisterPage from "./components/RegisterPage.vue";
 import MyEventsPage from "./components/MyEventsPage.vue";
 import MyVenuesPage from "./components/MyVenuesPage.vue";
+import ForgotPasswordPage from "./components/ForgotPasswordPage.vue";
+import SsoCallbackPage from "./components/SsoCallbackPage.vue";
 
 const routes = [
 	{ path: "/", name: "home", component: HomePage },
@@ -29,6 +31,8 @@ const routes = [
 	{ path: "/my-venues", name: "my-venues", component: MyVenuesPage },
 	{ path: "/login", name: "login", component: LoginPage },
 	{ path: "/register", name: "register", component: RegisterPage },
+	{ path: "/forgot-password", name: "forgot-password", component: ForgotPasswordPage },
+	{ path: "/sso-callback", name: "sso-callback", component: SsoCallbackPage },
 ];
 
 const router = createRouter({

@@ -13,49 +13,98 @@ const lastName = ref("");
 const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
+const verificationCode = ref("");
 const errorMessage = ref("");
+const isVerificationStep = ref(false);
+const isSubmitting = ref(false);
+
+const getClerkErrorMessage = (error) =>
+	error?.errors?.[0]?.longMessage ||
+	error?.errors?.[0]?.message ||
+	"Unable to create your account. Please try again.";
 
 const handleRegister = async () => {
-	if (!isLoaded.value) return;
+	if (!isLoaded.value || !signUp.value || !setActive.value) return;
 	if (password.value !== confirmPassword.value) {
 		errorMessage.value = "PASSWORDS_DO_NOT_MATCH";
 		return;
 	}
+	errorMessage.value = "";
+	isSubmitting.value = true;
 
 	try {
-		await signUp.value.create({
+		const result = await signUp.value.create({
 			firstName: firstName.value,
 			lastName: lastName.value,
 			emailAddress: email.value,
 			password: password.value,
 		});
 
-		// Start configuration for email verification if needed
-		if (signUp.value.status === "complete") {
-			await setActive({ session: signUp.value.createdSessionId });
+		if (result.status === "complete") {
+			await setActive.value({ session: result.createdSessionId });
 			router.push("/");
 		} else {
-			// If verification is required, you'd handle it here
-			console.log("Verification required", signUp.value.status);
+			await signUp.value.prepareEmailAddressVerification({
+				strategy: "email_code",
+			});
+			isVerificationStep.value = true;
 		}
 	} catch (error) {
-		console.error(error);
-		if (error.errors && error.errors.length > 0) {
-			errorMessage.value = (
-				error.errors[0].longMessage || error.errors[0].message
-			).toUpperCase();
+		errorMessage.value = getClerkErrorMessage(error);
+	} finally {
+		isSubmitting.value = false;
+	}
+};
+
+const handleVerifyEmail = async () => {
+	if (!isLoaded.value || !signUp.value || !setActive.value) return;
+	errorMessage.value = "";
+	isSubmitting.value = true;
+
+	try {
+		const result = await signUp.value.attemptEmailAddressVerification({
+			code: verificationCode.value,
+		});
+
+		if (result.status === "complete") {
+			await setActive.value({ session: result.createdSessionId });
+			router.push("/");
+		} else {
+			errorMessage.value = "Email verification could not be completed.";
 		}
+	} catch (error) {
+		errorMessage.value = getClerkErrorMessage(error);
+	} finally {
+		isSubmitting.value = false;
+	}
+};
+
+const resendVerificationCode = async () => {
+	if (!isLoaded.value || !signUp.value) return;
+	errorMessage.value = "";
+
+	try {
+		await signUp.value.prepareEmailAddressVerification({
+			strategy: "email_code",
+		});
+	} catch (error) {
+		errorMessage.value = getClerkErrorMessage(error);
 	}
 };
 
 const handleGoogleLogin = async () => {
-	if (!isLoaded.value) return;
+	if (!isLoaded.value || !signUp.value) return;
+	errorMessage.value = "";
 
-	signUp.value.authenticateWithRedirect({
-		strategy: "oauth_google",
-		redirectUrl: "/sso-callback",
-		redirectUrlComplete: "/",
-	});
+	try {
+		await signUp.value.authenticateWithRedirect({
+			strategy: "oauth_google",
+			redirectUrl: "/sso-callback",
+			redirectUrlComplete: "/",
+		});
+	} catch (error) {
+		errorMessage.value = getClerkErrorMessage(error);
+	}
 };
 </script>
 
@@ -98,12 +147,16 @@ const handleGoogleLogin = async () => {
 					<h2
 						class="text-4xl md:text-[40px] font-bold text-[#1a1a1a] tracking-tighter mb-2 uppercase"
 					>
-						CREATE ACCOUNT
+						{{ isVerificationStep ? "VERIFY EMAIL" : "CREATE ACCOUNT" }}
 					</h2>
 					<div class="w-20 h-1.5 bg-[#e63b2e] border-y border-[#e63b2e]"></div>
 				</div>
 
-				<form action="#" method="POST" class="space-y-6 w-full max-w-xl">
+				<form
+					v-if="!isVerificationStep"
+					class="space-y-6 w-full max-w-xl"
+					@submit.prevent="handleRegister"
+				>
 					<div class="flex flex-col sm:flex-row gap-6">
 						<div class="flex-1">
 							<label
@@ -207,14 +260,66 @@ const handleGoogleLogin = async () => {
 
 					<button
 						type="submit"
+						:disabled="isSubmitting || !isLoaded"
 						class="w-full bg-[#ffcc00] text-[#1a1a1a] text-[16px] font-bold py-4 uppercase tracking-widest hover:bg-[#e6b800] transition-colors mt-8 border-[3px] border-[#1a1a1a] shadow-[6px_6px_0px_0px_#1a1a1a] active:translate-y-1.5 active:translate-x-1.5 active:shadow-none"
-						@click.prevent="handleRegister"
 					>
-						INITIATE_ACCOUNT
+						{{ isSubmitting ? "CREATING ACCOUNT..." : "INITIATE ACCOUNT" }}
 					</button>
 				</form>
 
-				<div class="mt-8 flex items-center justify-center space-x-3 opacity-30">
+				<form
+					v-else
+					class="space-y-6 w-full max-w-xl"
+					@submit.prevent="handleVerifyEmail"
+				>
+					<p class="text-sm font-['Inter'] font-bold leading-relaxed">
+						We sent a verification code to <strong>{{ email }}</strong>. Enter it below to activate your account.
+					</p>
+					<div>
+						<label
+							for="verificationCode"
+							class="block text-[#1a1a1a] text-[10px] font-bold tracking-widest uppercase mb-2"
+							>VERIFICATION CODE</label
+						>
+						<div class="border-[1.5px] border-[#1a1a1a] bg-transparent p-0.5">
+							<input
+								v-model="verificationCode"
+								type="text"
+								inputmode="numeric"
+								autocomplete="one-time-code"
+								id="verificationCode"
+								placeholder="123456"
+								class="w-full px-3 py-2.5 bg-transparent text-[#1a1a1a] placeholder-gray-400 text-sm focus:outline-none focus:ring-0 font-mono tracking-[0.3em]"
+							/>
+						</div>
+					</div>
+					<p
+						v-if="errorMessage"
+						role="alert"
+						class="border-2 border-[#e63b2e] bg-red-50 px-3 py-2 text-[#b42318] text-xs font-bold uppercase"
+					>
+						{{ errorMessage }}
+					</p>
+					<button
+						type="submit"
+						:disabled="isSubmitting || !isLoaded"
+						class="w-full bg-[#ffcc00] text-[#1a1a1a] text-[16px] font-bold py-4 uppercase tracking-widest hover:bg-[#e6b800] transition-colors border-[3px] border-[#1a1a1a] shadow-[6px_6px_0px_0px_#1a1a1a]"
+					>
+						{{ isSubmitting ? "VERIFYING..." : "VERIFY EMAIL" }}
+					</button>
+					<button
+						type="button"
+						class="w-full text-[#0055ff] text-xs font-bold uppercase tracking-widest hover:text-[#003399]"
+						@click="resendVerificationCode"
+					>
+						Resend code
+					</button>
+				</form>
+
+				<div
+					v-if="!isVerificationStep"
+					class="mt-8 flex items-center justify-center space-x-3 opacity-30"
+				>
 					<div class="h-px bg-[#1a1a1a] grow"></div>
 					<span
 						class="text-[#1a1a1a] text-[10px] font-semibold uppercase tracking-widest whitespace-nowrap font-['Space_Grotesk']"
@@ -224,6 +329,7 @@ const handleGoogleLogin = async () => {
 				</div>
 
 				<button
+					v-if="!isVerificationStep"
 					class="w-full mt-6 flex items-center justify-center space-x-2 border-[3px] border-[#1a1a1a] bg-[#f5f0e8] text-[#1a1a1a] py-3.5 hover:bg-gray-100 transition-colors shadow-[4px_4px_0px_0px_#1a1a1a] active:translate-y-1 active:translate-x-1 active:shadow-none"
 					@click.prevent="handleGoogleLogin"
 				>
