@@ -1,199 +1,28 @@
-<script setup>
+<script setup lang="ts">
+import { computed, onMounted, ref, watch } from "vue";
+import { useAuth } from "@clerk/vue";
+import { RouterLink } from "vue-router";
 import Footer from "./Footer.vue";
 import Header from "./Header.vue";
+import { useApi } from "@/lib/api";
+import { formatCurrency, formatEventDate } from "@/lib/format";
+
+type Ticket = { id: string; status: string; currency: string; total: string; expiresAt: string | null; createdAt: string; eventId: string; eventTitle: string; eventSlug: string; startsAt: string; heroImageUrl: string | null; venueName: string; venueCity: string; seats: { id: string; label: string; zoneCode: string; price: string }[] };
+const api = useApi();
+const { isLoaded, isSignedIn } = useAuth();
+const tickets = ref<Ticket[]>([]);
+const query = ref("");
+const isLoading = ref(false);
+const errorMessage = ref("");
+const filteredTickets = computed(() => tickets.value.filter((ticket) => `${ticket.eventTitle} ${ticket.venueName} ${ticket.status}`.toLowerCase().includes(query.value.toLowerCase())));
+const upcomingTickets = computed(() => tickets.value.filter((ticket) => new Date(ticket.startsAt) >= new Date()).length);
+
+function statusLabel(status: string) { return status === "paid" ? "Confirmed" : status === "pending" ? "Seat hold" : status; }
+function statusClass(status: string) { return status === "paid" ? "bg-[#ffcc00]" : status === "pending" ? "bg-[#d6e3ff]" : "bg-gray-200"; }
+async function loadTickets() { if (!isSignedIn.value) return; isLoading.value = true; errorMessage.value = ""; try { tickets.value = await api<Ticket[]>("/me/tickets"); } catch (error) { errorMessage.value = error instanceof Error ? error.message : "Unable to load your tickets."; } finally { isLoading.value = false; } }
+onMounted(loadTickets); watch(isSignedIn, loadTickets);
 </script>
 
 <template>
-	<div class="min-h-screen bg-[#f5f0e8] text-[#1a1a1a] font-['Space_Grotesk']">
-		<Header />
-
-		<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-			<!-- Header Section -->
-			<section class="mb-8 sm:mb-12">
-				<h1 class="text-5xl sm:text-7xl md:text-[96px] font-bold leading-none mb-4 sm:mb-6">
-					My Tickets
-				</h1>
-				<div class="border-l-4 border-[#1a1a1a] pl-4 sm:pl-6 max-w-2xl">
-					<p class="text-base sm:text-xl font-['Inter']">
-						Manage your upcoming experiences, download receipts, and view
-						digital entry passes.
-					</p>
-				</div>
-			</section>
-
-			<!-- Filters & Summary Section -->
-			<section class="flex flex-col lg:flex-row gap-5 sm:gap-6 mb-8 sm:mb-12 justify-between">
-				<!-- Summary Cards -->
-				<div class="flex gap-4 sm:gap-6 w-full lg:w-auto">
-					<div
-						class="bg-[#ffcc00] border border-[#1a1a1a] p-4 sm:p-6 w-full sm:w-53 shadow-[4px_4px_0px_0px_#1a1a1a]"
-					>
-						<h3 class="text-3xl sm:text-4xl font-bold mb-1 sm:mb-2">12</h3>
-						<p class="text-xs sm:text-sm font-bold uppercase tracking-wider">
-							Total Tickets
-						</p>
-					</div>
-					<div
-						class="bg-white border border-[#1a1a1a] p-4 sm:p-6 w-full sm:w-53 shadow-[4px_4px_0px_0px_#1a1a1a]"
-					>
-						<h3 class="text-3xl sm:text-4xl font-bold mb-1 sm:mb-2">03</h3>
-						<p class="text-xs sm:text-sm font-bold uppercase tracking-wider">Upcoming</p>
-					</div>
-				</div>
-
-				<!-- Action Buttons -->
-				<div class="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-end">
-					<div class="relative w-full sm:w-auto">
-						<input
-							type="text"
-							placeholder="Search tickets..."
-							class="w-full sm:w-64 bg-white border border-[#1a1a1a] px-4 py-3 shadow-[4px_4px_0px_0px_#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
-						/>
-					</div>
-					<button
-						class="w-full sm:w-auto bg-[#1a1a1a] text-white px-6 py-3 font-bold border border-[#1a1a1a] hover:bg-black transition-colors shadow-[4px_4px_0px_0px_#ffcc00]"
-					>
-						Filter By Date
-					</button>
-				</div>
-			</section>
-
-			<!-- Tickets List -->
-			<section
-				class="border border-[#1a1a1a] bg-white shadow-[8px_8px_0px_0px_#1a1a1a] overflow-hidden"
-			>
-				<!-- Table Header -->
-				<div
-					class="hidden md:grid grid-cols-12 gap-4 bg-[#faf7f2] border-b border-[#1a1a1a] p-6 font-bold uppercase tracking-wider text-sm"
-				>
-					<div class="col-span-5">Event Details</div>
-					<div class="col-span-1 text-center">Qty</div>
-					<div class="col-span-2 text-center">Price</div>
-					<div class="col-span-2 text-center">Status</div>
-					<div class="col-span-2 text-center">Actions</div>
-				</div>
-
-				<!-- Table Body -->
-				<div class="divide-y divide-[#1a1a1a]">
-					<!-- Row 1: Confirmed -->
-					<div
-					class="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 p-4 sm:p-6 items-center hover:bg-[#faf7f2] transition-colors"
-					>
-						<div class="col-span-1 md:col-span-5 flex gap-3 sm:gap-6 items-center">
-							<div
-								class="w-16 h-16 sm:w-24 sm:h-24 bg-gray-200 border border-[#1a1a1a] shrink-0"
-							>
-								<img
-									src="https://placehold.co/96"
-									alt="Neon Nights Festival"
-									class="w-full h-full object-cover"
-								/>
-							</div>
-							<div>
-								<h3 class="text-lg sm:text-xl font-bold mb-1">Neon Nights Festival</h3>
-								<p class="text-xs sm:text-sm font-['Inter'] text-gray-600">
-									Aug 24, 2024 • Wembley Stadium
-								</p>
-							</div>
-						</div>
-						<div
-							class="col-span-1 flex justify-between md:justify-center items-center"
-						>
-							<span class="md:hidden font-bold">Quantity:</span>
-							<span class="font-bold">x2</span>
-						</div>
-						<div
-							class="col-span-1 md:col-span-2 flex justify-between md:justify-center items-center"
-						>
-							<span class="md:hidden font-bold">Price:</span>
-							<span class="font-bold">$240.00</span>
-						</div>
-						<div
-							class="col-span-1 md:col-span-2 flex justify-between md:justify-center items-center"
-						>
-							<span class="md:hidden font-bold">Status:</span>
-							<span
-								class="bg-[#ffcc00] border border-[#1a1a1a] px-3 py-1 text-sm font-bold shadow-[2px_2px_0px_0px_#1a1a1a]"
-								>Confirmed</span
-							>
-						</div>
-						<div
-							class="col-span-1 md:col-span-2 flex flex-col sm:flex-row xl:flex-row gap-2 justify-center"
-						>
-							<button
-								class="w-full sm:w-auto bg-[#1a1a1a] text-white px-4 py-2 text-sm font-bold border border-[#1a1a1a] hover:bg-black transition-colors"
-							>
-								View Ticket
-							</button>
-							<button
-								class="w-full sm:w-auto bg-white text-[#1a1a1a] px-4 py-2 text-sm font-bold border border-[#1a1a1a] hover:bg-gray-50 transition-colors"
-							>
-								Receipt
-							</button>
-						</div>
-					</div>
-
-					<!-- Row 2: Used -->
-					<div
-					class="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 p-4 sm:p-6 items-center bg-[#faf7f2] hover:bg-white transition-colors"
-					>
-						<div class="col-span-1 md:col-span-5 flex gap-3 sm:gap-6 items-center">
-							<div
-								class="w-16 h-16 sm:w-24 sm:h-24 bg-gray-200 border border-[#1a1a1a] shrink-0"
-							>
-								<img
-									src="https://placehold.co/96"
-									alt="The Underground Jazz"
-									class="w-full h-full object-cover grayscale opacity-80"
-								/>
-							</div>
-							<div class="opacity-80">
-								<h3 class="text-lg sm:text-xl font-bold mb-1">The Underground Jazz</h3>
-								<p class="text-xs sm:text-sm font-['Inter'] text-gray-600">
-									Jul 12, 2024 • Blue Note Lounge
-								</p>
-							</div>
-						</div>
-						<div
-							class="col-span-1 flex justify-between md:justify-center items-center opacity-80"
-						>
-							<span class="md:hidden font-bold">Quantity:</span>
-							<span class="font-bold">x1</span>
-						</div>
-						<div
-							class="col-span-1 md:col-span-2 flex justify-between md:justify-center items-center opacity-80"
-						>
-							<span class="md:hidden font-bold">Price:</span>
-							<span class="font-bold">$45.00</span>
-						</div>
-						<div
-							class="col-span-1 md:col-span-2 flex justify-between md:justify-center items-center"
-						>
-							<span class="md:hidden font-bold">Status:</span>
-							<span
-								class="bg-gray-200 border border-[#1a1a1a] px-3 py-1 text-sm font-bold text-gray-600 shadow-[2px_2px_0px_0px_#1a1a1a]"
-								>Used</span
-							>
-						</div>
-						<div
-							class="col-span-1 md:col-span-2 flex flex-col sm:flex-row xl:flex-row gap-2 justify-center"
-						>
-							<button
-								class="w-full sm:w-auto bg-white text-gray-500 px-4 py-2 text-sm font-bold border border-gray-300 cursor-not-allowed"
-							>
-								View Ticket
-							</button>
-							<button
-								class="w-full sm:w-auto bg-white text-[#1a1a1a] px-4 py-2 text-sm font-bold border border-[#1a1a1a] hover:bg-gray-50 transition-colors"
-							>
-								Receipt
-							</button>
-						</div>
-					</div>
-				</div>
-			</section>
-		</main>
-
-		<Footer />
-	</div>
+	<div class="min-h-screen bg-[#f5f0e8] font-['Space_Grotesk'] text-[#1a1a1a]"><Header /><main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12"><section class="mb-8 sm:mb-12"><h1 class="mb-4 text-5xl font-bold leading-none sm:text-7xl md:text-[96px]">My Tickets</h1><p class="max-w-2xl border-l-4 border-[#1a1a1a] pl-4 font-['Inter'] sm:pl-6 sm:text-xl">Manage your upcoming experiences and digital entry passes.</p></section><div v-if="!isLoaded" class="border-2 border-[#1a1a1a] bg-white p-6 font-bold uppercase">Loading account…</div><section v-else-if="!isSignedIn" class="border-4 border-[#1a1a1a] bg-white p-8 shadow-[6px_6px_0_0_#1a1a1a]"><h2 class="mb-3 text-2xl font-bold uppercase">Sign in to see your tickets</h2><RouterLink :to="{ name: 'login', query: { redirect: '/tickets' } }" class="inline-block bg-[#e63b2e] px-5 py-3 font-bold uppercase text-white">Sign in</RouterLink></section><template v-else><section class="mb-8 flex flex-col gap-5 sm:mb-12 lg:flex-row lg:items-end lg:justify-between"><div class="flex gap-4"><div class="w-36 border border-[#1a1a1a] bg-[#ffcc00] p-4 shadow-[4px_4px_0_0_#1a1a1a]"><p class="text-3xl font-bold">{{ tickets.length }}</p><p class="text-xs font-bold uppercase">Total orders</p></div><div class="w-36 border border-[#1a1a1a] bg-white p-4 shadow-[4px_4px_0_0_#1a1a1a]"><p class="text-3xl font-bold">{{ upcomingTickets }}</p><p class="text-xs font-bold uppercase">Upcoming</p></div></div><input v-model="query" type="search" placeholder="Search tickets…" class="w-full border-2 border-[#1a1a1a] bg-white px-4 py-3 font-bold sm:w-64" /></section><section class="overflow-hidden border-2 border-[#1a1a1a] bg-white shadow-[8px_8px_0_0_#1a1a1a]"><div v-if="isLoading" class="p-8 font-bold uppercase">Loading tickets…</div><div v-else-if="errorMessage" class="p-8 font-bold uppercase text-[#e63b2e]">{{ errorMessage }}</div><div v-else-if="filteredTickets.length === 0" class="p-8 font-bold uppercase">No ticket orders yet. Find an event and select your seats.</div><div v-else class="divide-y-2 divide-[#1a1a1a]"><article v-for="ticket in filteredTickets" :key="ticket.id" class="grid grid-cols-1 gap-4 p-4 hover:bg-[#faf7f2] sm:p-6 md:grid-cols-[1fr_auto_auto] md:items-center"><RouterLink :to="{ name: 'event-details', params: { id: ticket.eventSlug || ticket.eventId } }" class="flex gap-4"><img :src="ticket.heroImageUrl || '/imgHeroBg.webp'" :alt="ticket.eventTitle" class="size-16 border border-[#1a1a1a] object-cover sm:size-20" /><div><h2 class="text-lg font-bold">{{ ticket.eventTitle }}</h2><p class="font-['Inter'] text-sm text-gray-600">{{ formatEventDate(ticket.startsAt) }} · {{ ticket.venueName }}, {{ ticket.venueCity }}</p><p class="mt-1 text-xs font-bold uppercase">{{ ticket.seats.length }} seat{{ ticket.seats.length === 1 ? '' : 's' }}: {{ ticket.seats.map((seat) => seat.label).join(', ') }}</p></div></RouterLink><div class="flex justify-between gap-4 md:block md:text-center"><span class="md:hidden font-bold uppercase">Price</span><span class="font-bold">{{ formatCurrency(ticket.total, ticket.currency) }}</span></div><div class="flex flex-col items-start gap-2 md:items-center"><span :class="['border border-[#1a1a1a] px-3 py-1 text-sm font-bold shadow-[2px_2px_0_0_#1a1a1a]', statusClass(ticket.status)]">{{ statusLabel(ticket.status) }}</span><small v-if="ticket.status === 'pending' && ticket.expiresAt" class="text-center font-bold text-[#e63b2e]">Hold expires {{ formatEventDate(ticket.expiresAt, { hour: 'numeric', minute: '2-digit' }) }}</small></div></article></div></section></template></main><Footer /></div>
 </template>

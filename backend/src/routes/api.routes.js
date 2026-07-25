@@ -62,7 +62,9 @@ async function ownedEvent(eventId, ownerId, client = db) {
 
 async function eventDetail(idOrSlug, publicOnly = true) {
 	const event = await db.query(
-		`SELECT e.*, jsonb_build_object(
+		`SELECT e.id, e.title, e.slug, e.category, e.badge_text AS "badgeText", e.summary, e.description,
+		e.hero_image_url AS "heroImageUrl", e.doors_at AS "doorsAt", e.starts_at AS "startsAt",
+		e.ends_at AS "endsAt", e.currency, e.status, e.created_at AS "createdAt", e.updated_at AS "updatedAt", jsonb_build_object(
 			'id', v.id, 'name', v.name, 'slug', v.slug, 'address', v.address,
 			'city', v.city, 'countryCode', v.country_code, 'capacity', v.capacity,
 			'imageUrl', v.image_url, 'latitude', v.latitude, 'longitude', v.longitude
@@ -83,7 +85,11 @@ async function eventDetail(idOrSlug, publicOnly = true) {
 
 async function venueDetail(idOrSlug, publicOnly = true) {
 	const venue = await db.query(
-		`SELECT * FROM venues WHERE (id::text = $1 OR slug = $1) ${publicOnly ? "AND status = 'active'" : ""}`,
+		`SELECT id, name, slug, address, city, country_code AS "countryCode", latitude, longitude,
+		description, image_url AS "imageUrl", capacity, rating, audio_system AS "audioSystem",
+		lighting_system AS "lightingSystem", stage_area_sqm AS "stageAreaSqm", status,
+		created_at AS "createdAt", updated_at AS "updatedAt"
+		FROM venues WHERE (id::text = $1 OR slug = $1) ${publicOnly ? "AND status = 'active'" : ""}`,
 		[idOrSlug],
 	);
 	if (venue.rowCount === 0) throw httpError(404, "VENUE_NOT_FOUND", "Venue not found.");

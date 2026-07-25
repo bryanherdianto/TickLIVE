@@ -1,263 +1,60 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import Header from "./Header.vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { RouterLink, useRoute } from "vue-router";
+import { CalendarIcon, ClockIcon, MapPinIcon } from "@heroicons/vue/24/outline";
 import Footer from "./Footer.vue";
-import {
-	CalendarIcon,
-	MapPinIcon,
-	TicketIcon,
-	ClockIcon,
-	PlayIcon,
-} from "@heroicons/vue/24/outline";
-import { HeartIcon } from "@heroicons/vue/20/solid";
+import Header from "./Header.vue";
+import { apiRequest } from "@/lib/api";
+import { formatCurrency, formatEventDate, formatTime } from "@/lib/format";
+
+type EventDetail = {
+	id: string; title: string; category: string; badgeText: string | null; summary: string | null; description: string | null;
+	heroImageUrl: string | null; startsAt: string; endsAt: string | null; doorsAt: string | null; currency: string;
+	venue: { id: string; name: string; city: string; address: string; imageUrl: string | null };
+	images: { id: string; imageUrl: string; altText: string | null }[];
+	lineup: { id: string; name: string; role: string | null; imageUrl: string | null }[];
+	pricing: { minPrice: string | null; maxPrice: string | null; availableSeats: number };
+};
+
+const route = useRoute();
+const event = ref<EventDetail | null>(null);
+const isLoading = ref(true);
+const errorMessage = ref("");
+const gallery = computed(() => event.value ? [event.value.heroImageUrl, ...event.value.images.map((image) => image.imageUrl)].filter(Boolean) as string[] : []);
+
+async function loadEvent() {
+	isLoading.value = true; errorMessage.value = "";
+	try { event.value = await apiRequest<EventDetail>(`/events/${encodeURIComponent(String(route.params.id))}`); }
+	catch (error) { errorMessage.value = error instanceof Error ? error.message : "Unable to load this event."; event.value = null; }
+	finally { isLoading.value = false; }
+}
+onMounted(loadEvent);
+watch(() => route.params.id, loadEvent);
 </script>
 
 <template>
-	<div
-		class="min-h-screen flex flex-col bg-[#f5f0e8] font-['Space_Grotesk'] text-[#1a1a1a]"
-	>
+	<div class="min-h-screen bg-[#f5f0e8] font-['Space_Grotesk'] text-[#1a1a1a]">
 		<Header />
+		<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+			<div v-if="isLoading" class="border-4 border-[#1a1a1a] bg-white p-8 font-bold uppercase">Loading event…</div>
+			<div v-else-if="errorMessage" class="border-4 border-[#e63b2e] bg-white p-8 font-bold uppercase text-[#e63b2e]">{{ errorMessage }}</div>
+			<template v-else-if="event">
+				<section class="mb-8 overflow-hidden border-4 border-[#1a1a1a] bg-[#1a1a1a] shadow-[10px_10px_0_0_#1a1a1a] lg:mb-12 lg:grid lg:grid-cols-2">
+					<div class="p-6 text-white sm:p-10"><span class="mb-5 inline-block border-2 border-[#1a1a1a] bg-[#ffcc00] px-3 py-1 text-sm font-bold uppercase text-[#1a1a1a]">{{ event.badgeText || event.category }}</span><p class="mb-3 font-bold uppercase text-[#ffcc00]">{{ event.category }}</p><h1 class="mb-6 text-4xl font-black uppercase leading-none sm:text-6xl lg:text-7xl">{{ event.title }}</h1><p class="max-w-xl text-base font-bold sm:text-xl">{{ event.summary || event.description || 'Details will be announced soon.' }}</p></div>
+					<img :src="event.heroImageUrl || '/imgHeroBg.webp'" :alt="event.title" class="h-64 w-full object-cover sm:h-96 lg:h-full" />
+				</section>
 
-		<main class="grow pb-10 p-4 sm:p-6 lg:p-12 max-w-7xl mx-auto w-full">
-			<!-- Event Header Section -->
-			<section
-				class="border-b-4 border-[#1a1a1a] pb-8 sm:pb-12 mb-8 sm:mb-12 flex flex-col md:flex-row justify-between items-start gap-6 sm:gap-8"
-			>
-				<div class="flex-1 space-y-5 sm:space-y-8">
-					<div
-						class="inline-block bg-[#e63b2e] text-white px-4 py-2 border-[3px] border-[#1a1a1a] shadow-[4px_4px_0_0_#1a1a1a] font-bold text-sm tracking-widest uppercase"
-					>
-						Live Performance
+				<div class="grid gap-8 lg:grid-cols-[1fr_22rem]">
+					<div class="space-y-10">
+						<section><h2 class="mb-5 inline-block border-b-4 border-[#1a1a1a] pb-1 text-3xl font-bold uppercase sm:text-4xl">Overview</h2><p class="max-w-3xl whitespace-pre-line font-['Inter'] text-base leading-relaxed sm:text-lg">{{ event.description || event.summary || 'Event information will be published soon.' }}</p></section>
+						<section v-if="gallery.length"><h2 class="mb-5 inline-block border-b-4 border-[#e63b2e] pb-1 text-3xl font-bold uppercase sm:text-4xl">Gallery</h2><div class="grid grid-cols-1 gap-4 sm:grid-cols-2"><img v-for="(image, index) in gallery" :key="image" :src="image" :alt="`${event.title} image ${index + 1}`" class="h-56 w-full border-2 border-[#1a1a1a] object-cover shadow-[4px_4px_0_0_#1a1a1a]" /></div></section>
+						<section v-if="event.lineup.length"><h2 class="mb-5 inline-block border-b-4 border-[#0055ff] pb-1 text-3xl font-bold uppercase sm:text-4xl">Lineup</h2><div class="grid gap-4 sm:grid-cols-2"><div v-for="artist in event.lineup" :key="artist.id" class="flex items-center gap-4 border-2 border-[#1a1a1a] bg-white p-4 shadow-[4px_4px_0_0_#1a1a1a]"><img v-if="artist.imageUrl" :src="artist.imageUrl" :alt="artist.name" class="size-14 object-cover" /><div><p class="text-xl font-bold uppercase">{{ artist.name }}</p><p class="text-sm font-bold uppercase text-[#0055ff]">{{ artist.role || 'Performer' }}</p></div></div></div></section>
+						<section><h2 class="mb-5 inline-block border-b-4 border-[#1a1a1a] pb-1 text-3xl font-bold uppercase sm:text-4xl">Location</h2><RouterLink :to="{ name: 'venue-details', params: { id: event.venue.id } }" class="block border-4 border-[#1a1a1a] bg-white p-5 shadow-[6px_6px_0_0_#1a1a1a]"><MapPinIcon class="mb-3 size-8" /><p class="text-xl font-bold uppercase">{{ event.venue.name }}</p><p class="font-['Inter']">{{ event.venue.address }}, {{ event.venue.city }}</p></RouterLink></section>
 					</div>
-
-					<h1
-						class="text-5xl sm:text-6xl md:text-8xl font-black leading-none uppercase tracking-tighter"
-					>
-						Cyber Punk<br />Orchestra
-					</h1>
-
-					<div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4">
-						<button
-							class="bg-[#ffcc00] hover:bg-[#ffe066] text-[#1a1a1a] border-[3px] border-[#1a1a1a] shadow-[6px_6px_0_0_#1a1a1a] hover:shadow-[2px_2px_0_0_#1a1a1a] hover:translate-x-1 hover:translate-y-1 transition-all px-8 py-2 font-bold text-lg flex items-center justify-center gap-2"
-						>
-							<TicketIcon class="w-6 h-6" />
-							BUY TICKETS
-						</button>
-						<button
-							class="bg-[#0055ff] hover:bg-[#3377ff] text-white border-[3px] border-[#1a1a1a] shadow-[6px_6px_0_0_#1a1a1a] hover:shadow-[2px_2px_0_0_#1a1a1a] hover:translate-x-1 hover:translate-y-1 transition-all px-8 py-2 font-bold text-lg flex items-center justify-center gap-2"
-						>
-							<HeartIcon class="w-6 h-6 text-white" />
-							SAVE EVENT
-						</button>
-					</div>
+					<aside><div class="border-4 border-[#1a1a1a] bg-white p-5 shadow-[8px_8px_0_0_#1a1a1a] lg:sticky lg:top-28 sm:p-6"><h2 class="mb-5 border-b-4 border-[#1a1a1a] pb-2 text-2xl font-black uppercase">Event details</h2><dl class="mb-5 space-y-4"><div class="flex gap-3"><CalendarIcon class="size-6 shrink-0" /><div><dt class="text-xs font-bold uppercase text-gray-500">Date</dt><dd class="font-bold">{{ formatEventDate(event.startsAt) }}</dd></div></div><div class="flex gap-3"><ClockIcon class="size-6 shrink-0" /><div><dt class="text-xs font-bold uppercase text-gray-500">Time</dt><dd class="font-bold">{{ formatTime(event.startsAt) }}<template v-if="event.endsAt"> – {{ formatTime(event.endsAt) }}</template></dd></div></div><div class="flex gap-3"><MapPinIcon class="size-6 shrink-0" /><div><dt class="text-xs font-bold uppercase text-gray-500">Venue</dt><dd class="font-bold">{{ event.venue.name }}</dd></div></div></dl><div class="mb-5 border-2 border-[#1a1a1a] bg-[#eee9e0] p-3"><p class="text-xs font-bold uppercase">From</p><p class="text-2xl font-black">{{ formatCurrency(event.pricing.minPrice, event.currency) }}</p><p class="text-xs font-bold uppercase text-gray-500">{{ event.pricing.availableSeats }} seats available</p></div><RouterLink :to="{ name: 'seat-selection', params: { eventId: event.id } }" class="block border-4 border-[#1a1a1a] bg-[#e63b2e] px-5 py-3 text-center text-xl font-black uppercase text-white shadow-[5px_5px_0_0_#1a1a1a] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#1a1a1a]">Select seats</RouterLink></div></aside>
 				</div>
-
-				<div
-					class="md:w-2/5 md:pt-4 md:border-t-4 border-[#1a1a1a] md:pl-8 mt-0"
-				>
-					<p class="text-xl md:text-2xl font-medium leading-tight font-sans">
-						"A sensory overload where classical strings meet industrial
-						distortion. An auditory revolution in the heart of the concrete
-						jungle."
-					</p>
-				</div>
-			</section>
-
-			<!-- Brutalist Gallery -->
-			<section
-				class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-10 sm:mb-16 h-auto md:h-125"
-			>
-				<div
-					class="lg:col-span-2 border-4 border-[#1a1a1a] shadow-[8px_8px_0_0_#1a1a1a] bg-white h-60 sm:h-75 md:h-full relative overflow-hidden group cursor-pointer"
-				>
-					<img
-						src="https://images.unsplash.com/photo-1540039155732-d6986c714be8?auto=format&fit=crop&q=80"
-						alt="Cyberpunk aesthetic concert"
-						class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500"
-					/>
-					<div class="absolute inset-0 bg-transparent mix-blend-color"></div>
-				</div>
-
-				<div class="flex flex-col gap-4 sm:gap-6 h-full">
-					<div
-						class="flex-1 border-4 border-[#1a1a1a] shadow-[8px_8px_0_0_#1a1a1a] bg-white relative overflow-hidden group cursor-pointer h-40 sm:h-50 md:h-auto"
-					>
-						<img
-							src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&q=80"
-							alt="Crowd at concert"
-							class="w-full h-full object-cover filter contrast-125 sepia group-hover:sepia-0 transition-all duration-500"
-						/>
-					</div>
-					<div
-						class="flex-1 border-4 border-[#1a1a1a] shadow-[8px_8px_0_0_#1a1a1a] bg-white relative overflow-hidden group cursor-pointer h-40 sm:h-50 md:h-auto"
-					>
-						<img
-							src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&q=80"
-							alt="Crowd at concert"
-							class="w-full h-full object-cover filter contrast-125 sepia group-hover:sepia-0 transition-all duration-500"
-						/>
-					</div>
-				</div>
-			</section>
-
-			<!-- Content Layout -->
-			<div class="flex flex-col lg:flex-row gap-8 sm:gap-12 text-[#1a1a1a]">
-				<!-- Left: Description -->
-				<div class="flex-1 space-y-8 sm:space-y-12 pr-0 lg:pr-12">
-					<section>
-						<h2
-							class="text-3xl sm:text-4xl font-bold border-b-4 border-[#1a1a1a] pb-2 mb-4 sm:mb-6 inline-block uppercase"
-						>
-							Overview
-						</h2>
-						<div class="text-base sm:text-lg space-y-4 sm:space-y-6 font-sans leading-relaxed">
-							<p>
-								Experience the clash of centuries. The Cyber Punk Orchestra
-								brings together 60 classically trained musicians and 5
-								electronic sound designers to create an unprecedented wall of
-								sound.
-							</p>
-							<p>
-								Expect reimagined symphonies layered with dirty synth basslines,
-								glitch percussion, and immersive neo-noir lighting that will
-								transport you to a dystopian future.
-							</p>
-						</div>
-					</section>
-
-					<section>
-						<h2
-							class="text-3xl sm:text-4xl font-bold border-b-4 border-[#1a1a1a] pb-2 mb-4 sm:mb-6 inline-block uppercase"
-						>
-							Lineup
-						</h2>
-						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<div
-								class="border-[3px] border-[#1a1a1a] p-4 bg-white shadow-[4px_4px_0_0_#1a1a1a] flex gap-4 items-center"
-							>
-								<img
-									src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=150&h=150"
-									alt="Maestro Vorn"
-									class="w-16 h-16 object-cover border-2 border-[#1a1a1a] shadow-[2px_2px_0_0_#1a1a1a]"
-								/>
-								<div>
-									<span class="font-bold text-xl uppercase block leading-tight"
-										>Maestro Vorn</span
-									>
-									<span
-										class="text-sm border-2 border-[#1a1a1a] px-2 py-0.5 bg-[#ffcc00] mt-1 inline-block font-bold uppercase tracking-wider"
-										>Conductor</span
-									>
-								</div>
-							</div>
-							<div
-								class="border-[3px] border-[#1a1a1a] p-4 bg-white shadow-[4px_4px_0_0_#1a1a1a] flex gap-4 items-center"
-							>
-								<img
-									src="https://images.unsplash.com/photo-1543132220-4bf3de6e10ae?auto=format&fit=crop&q=80&w=150&h=150"
-									alt="Syntax Error"
-									class="w-16 h-16 object-cover border-2 border-[#1a1a1a] shadow-[2px_2px_0_0_#1a1a1a]"
-								/>
-								<div>
-									<span class="font-bold text-xl uppercase block leading-tight"
-										>Syntax Error</span
-									>
-									<span
-										class="text-sm border-2 border-[#1a1a1a] px-2 py-0.5 bg-[#e63b2e] text-white mt-1 inline-block font-bold uppercase tracking-wider"
-										>Synths</span
-									>
-								</div>
-							</div>
-						</div>
-					</section>
-
-					<section>
-						<h2
-							class="text-3xl sm:text-4xl font-bold border-b-4 border-[#1a1a1a] pb-2 mb-4 sm:mb-6 inline-block uppercase"
-						>
-							Location Info
-						</h2>
-						<div
-							class="border-4 border-[#1a1a1a] bg-white shadow-[8px_8px_0_0_#1a1a1a] p-4 sm:p-6 h-52 sm:h-60 flex items-center justify-center"
-						>
-							<div class="text-center space-y-2">
-								<MapPinIcon class="w-12 h-12 mx-auto" />
-								<p class="font-bold text-xl uppercase">The Neon Warehouse</p>
-								<p class="font-sans">
-									Sector 7, Industrial District<br />Neo-Tokyo
-								</p>
-							</div>
-						</div>
-						<p class="mt-4 sm:mt-6 font-bold uppercase">
-							Sector 7, Industrial District, Neo-Tokyo
-						</p>
-					</section>
-				</div>
-
-				<!-- Right: Sidebar (Ticket details) -->
-				<aside class="w-full lg:w-100">
-					<div
-						class="border-4 border-[#1a1a1a] bg-white shadow-[12px_12px_0_0_#1a1a1a] p-5 sm:p-8 lg:sticky top-28"
-					>
-						<h3
-							class="text-3xl font-black uppercase mb-4 border-b-4 border-[#1a1a1a]"
-						>
-							Event Details
-						</h3>
-
-						<ul class="space-y-3 mb-4">
-							<li class="flex items-start gap-4">
-								<div
-									class="bg-[#ffcc00] p-2 border-2 border-[#1a1a1a] shadow-[2px_2px_0_0_#1a1a1a]"
-								>
-									<CalendarIcon class="w-6 h-6" />
-								</div>
-								<div>
-									<p class="font-bold uppercase text-sm text-gray-500">Date</p>
-									<p class="font-bold text-xl">October 24, 2026</p>
-								</div>
-							</li>
-							<li class="flex items-start gap-4">
-								<div
-									class="bg-[#ffcc00] p-2 border-2 border-[#1a1a1a] shadow-[2px_2px_0_0_#1a1a1a]"
-								>
-									<ClockIcon class="w-6 h-6" />
-								</div>
-								<div>
-									<p class="font-bold uppercase text-sm text-gray-500">Time</p>
-									<p class="font-bold text-xl">21:00 - 02:00 (EST)</p>
-								</div>
-							</li>
-							<li class="flex items-start gap-4">
-								<div
-									class="bg-[#ffcc00] p-2 border-2 border-[#1a1a1a] shadow-[2px_2px_0_0_#1a1a1a]"
-								>
-									<MapPinIcon class="w-6 h-6" />
-								</div>
-								<div>
-									<p class="font-bold uppercase text-sm text-gray-500">Venue</p>
-									<p class="font-bold text-xl">The Neon Warehouse</p>
-								</div>
-							</li>
-						</ul>
-
-						<div class="bg-gray-100 border-[3px] border-[#1a1a1a] p-2 mb-4">
-							<div class="flex justify-between items-center">
-								<span class="font-bold uppercase">General Admission</span>
-								<span class="font-black text-xl sm:text-2xl">$45.00</span>
-							</div>
-						</div>
-
-						<button
-							class="w-full bg-[#e63b2e] hover:bg-[#ff4433] text-white border-4 border-[#1a1a1a] shadow-[6px_6px_0_0_#1a1a1a] hover:shadow-[2px_2px_0_0_#1a1a1a] hover:translate-x-1 hover:translate-y-1 transition-all px-8 py-2 font-black text-2xl tracking-wide uppercase"
-						>
-							Checkout
-						</button>
-					</div>
-				</aside>
-			</div>
+			</template>
 		</main>
-
 		<Footer />
 	</div>
 </template>

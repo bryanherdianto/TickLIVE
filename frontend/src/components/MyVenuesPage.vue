@@ -1,135 +1,23 @@
-<script setup>
+<script setup lang="ts">
+import { onMounted, ref, watch } from "vue";
+import { useAuth } from "@clerk/vue";
+import { RouterLink } from "vue-router";
 import Footer from "./Footer.vue";
 import Header from "./Header.vue";
+import { useApi } from "@/lib/api";
+import { formatCurrency } from "@/lib/format";
 
-const venues = [
-	{
-		name: "The Concrete Cube",
-		location: "Berlin, DE",
-		capacity: "1,200",
-		events: "4 active",
-		revenue: "$42,300",
-		status: "Active",
-	},
-	{
-		name: "Blue Note Lounge",
-		location: "London, UK",
-		capacity: "320",
-		events: "2 active",
-		revenue: "$13,980",
-		status: "Active",
-	},
-	{
-		name: "City Arena",
-		location: "Manchester, UK",
-		capacity: "2,000",
-		events: "No upcoming events",
-		revenue: "$8,400",
-		status: "Inactive",
-	},
-];
+type Summary = { totalVenues: number; activeEvents: number; revenue: string };
+type Venue = { id: string; name: string; slug: string; city: string; address: string; capacity: number; status: "active" | "inactive"; activeEvents: number; revenue: string };
+const api = useApi(); const { isLoaded, isSignedIn } = useAuth();
+const summary = ref<Summary>({ totalVenues: 0, activeEvents: 0, revenue: "0" });
+const venues = ref<Venue[]>([]); const isLoading = ref(false); const isSaving = ref(false); const errorMessage = ref(""); const showForm = ref(false);
+const form = ref({ name: "", address: "", city: "", capacity: 100, description: "" });
+async function loadVenues() { if (!isSignedIn.value) return; isLoading.value = true; errorMessage.value = ""; try { const [summaryData, venuesData] = await Promise.all([api<Summary>("/me/organizer/summary"), api<Venue[]>("/me/venues")]); summary.value = summaryData; venues.value = venuesData; } catch (error) { errorMessage.value = error instanceof Error ? error.message : "Unable to load your venues."; } finally { isLoading.value = false; } }
+async function createVenue() { isSaving.value = true; errorMessage.value = ""; try { await api<Venue>("/me/venues", { method: "POST", body: form.value }); form.value = { name: "", address: "", city: "", capacity: 100, description: "" }; showForm.value = false; await loadVenues(); } catch (error) { errorMessage.value = error instanceof Error ? error.message : "Unable to create your venue."; } finally { isSaving.value = false; } }
+onMounted(loadVenues); watch(isSignedIn, loadVenues);
 </script>
 
 <template>
-	<div class="min-h-screen bg-[#f5f0e8] text-[#1a1a1a] font-['Space_Grotesk']">
-		<Header />
-
-		<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
-			<section class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10 sm:mb-12">
-				<div>
-					<p class="text-[#05f] font-bold uppercase tracking-widest mb-2">
-						Organizer dashboard
-					</p>
-					<h1 class="text-5xl sm:text-7xl md:text-[96px] font-bold leading-none uppercase">
-						My Venues
-					</h1>
-					<div class="border-l-4 border-[#1a1a1a] pl-4 sm:pl-6 mt-5 max-w-2xl">
-						<p class="text-base sm:text-xl font-['Inter']">
-							Create and manage your venue listings, review active events, and follow the revenue they generate.
-						</p>
-					</div>
-				</div>
-				<button
-					type="button"
-					class="bg-[#05f] text-white px-6 py-4 font-bold uppercase border-2 border-[#1a1a1a] shadow-[4px_4px_0px_0px_#1a1a1a] hover:-translate-y-0.5 transition-transform"
-				>
-					+ Create Venue
-				</button>
-			</section>
-
-			<section class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10 sm:mb-12">
-				<div class="bg-[#ffcc00] border-2 border-[#1a1a1a] p-5 sm:p-6 shadow-[4px_4px_0px_0px_#1a1a1a]">
-					<p class="text-sm font-bold uppercase tracking-wider mb-2">Total venues</p>
-					<h2 class="text-4xl font-bold">6</h2>
-				</div>
-				<div class="bg-white border-2 border-[#1a1a1a] p-5 sm:p-6 shadow-[4px_4px_0px_0px_#1a1a1a]">
-					<p class="text-sm font-bold uppercase tracking-wider mb-2">Active events</p>
-					<h2 class="text-4xl font-bold">8</h2>
-				</div>
-				<div class="bg-[#05f] text-white border-2 border-[#1a1a1a] p-5 sm:p-6 shadow-[4px_4px_0px_0px_#1a1a1a]">
-					<p class="text-sm font-bold uppercase tracking-wider mb-2">Venue revenue</p>
-					<h2 class="text-4xl font-bold">$64,680</h2>
-				</div>
-			</section>
-
-			<section class="flex flex-col sm:flex-row gap-4 justify-between mb-6">
-				<input
-					type="search"
-					placeholder="Search your venues"
-					aria-label="Search your venues"
-					class="w-full sm:max-w-sm bg-white border-2 border-[#1a1a1a] px-4 py-3 font-bold shadow-[4px_4px_0px_0px_#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
-				/>
-				<select
-					aria-label="Filter venues by status"
-					class="bg-white border-2 border-[#1a1a1a] px-4 py-3 font-bold shadow-[4px_4px_0px_0px_#1a1a1a] focus:outline-none"
-				>
-					<option>All venues</option>
-					<option>Active</option>
-					<option>Inactive</option>
-				</select>
-			</section>
-
-			<section class="border-2 border-[#1a1a1a] bg-white shadow-[8px_8px_0px_0px_#1a1a1a] overflow-hidden">
-				<div class="hidden md:grid grid-cols-12 gap-4 bg-[#faf7f2] border-b-2 border-[#1a1a1a] p-5 font-bold uppercase tracking-wider text-sm">
-					<div class="col-span-4">Venue</div>
-					<div class="col-span-2">Location & capacity</div>
-					<div class="col-span-2 text-center">Events</div>
-					<div class="col-span-2 text-center">Revenue</div>
-					<div class="col-span-2 text-center">Actions</div>
-				</div>
-				<div class="divide-y-2 divide-[#1a1a1a]">
-					<div
-						v-for="venue in venues"
-						:key="venue.name"
-						class="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 p-5 items-center hover:bg-[#faf7f2] transition-colors"
-					>
-						<div class="md:col-span-4">
-							<div class="flex items-center gap-3">
-								<div class="w-12 h-12 shrink-0 bg-[#05f] border-2 border-[#1a1a1a]"></div>
-								<div>
-									<h3 class="text-lg font-bold uppercase">{{ venue.name }}</h3>
-									<span class="inline-block mt-1 px-2 py-0.5 text-xs font-bold uppercase border border-[#1a1a1a]" :class="venue.status === 'Active' ? 'bg-[#ffcc00]' : 'bg-gray-200'">{{ venue.status }}</span>
-								</div>
-							</div>
-						</div>
-						<div class="md:col-span-2 flex md:block justify-between gap-4 text-sm font-['Inter']">
-							<span class="md:hidden font-bold uppercase">Location & capacity</span>
-							<span>{{ venue.location }}<br />{{ venue.capacity }} guests</span>
-						</div>
-						<div class="md:col-span-2 flex md:justify-center justify-between font-bold">
-							<span class="md:hidden uppercase">Events</span><span>{{ venue.events }}</span>
-						</div>
-						<div class="md:col-span-2 flex md:justify-center justify-between font-bold">
-							<span class="md:hidden uppercase">Revenue</span><span>{{ venue.revenue }}</span>
-						</div>
-						<div class="md:col-span-2">
-							<button type="button" class="w-full bg-[#1a1a1a] text-white px-4 py-2 text-sm font-bold uppercase hover:bg-black transition-colors">Manage venue</button>
-						</div>
-					</div>
-				</div>
-			</section>
-		</main>
-
-		<Footer />
-	</div>
+	<div class="min-h-screen bg-[#f5f0e8] font-['Space_Grotesk'] text-[#1a1a1a]"><Header /><main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12"><section class="mb-10 flex flex-col gap-6 lg:mb-12 lg:flex-row lg:items-end lg:justify-between"><div><p class="mb-2 font-bold uppercase tracking-widest text-[#05f]">Organizer dashboard</p><h1 class="text-5xl font-bold uppercase leading-none sm:text-7xl md:text-[96px]">My Venues</h1><p class="mt-5 max-w-2xl border-l-4 border-[#1a1a1a] pl-4 font-['Inter'] sm:pl-6 sm:text-xl">Create and manage venue listings, review active events, and follow the revenue they generate.</p></div><button v-if="isSignedIn" type="button" class="bg-[#05f] px-6 py-4 font-bold uppercase text-white shadow-[4px_4px_0_0_#1a1a1a]" @click="showForm = !showForm">{{ showForm ? 'Close form' : '+ Create venue' }}</button></section><div v-if="!isLoaded" class="border-2 border-[#1a1a1a] bg-white p-6 font-bold uppercase">Loading account…</div><section v-else-if="!isSignedIn" class="border-4 border-[#1a1a1a] bg-white p-8"><h2 class="mb-4 text-2xl font-bold uppercase">Sign in to manage venues</h2><RouterLink :to="{ name: 'login', query: { redirect: '/my-venues' } }" class="inline-block bg-[#e63b2e] px-5 py-3 font-bold uppercase text-white">Sign in</RouterLink></section><template v-else><form v-if="showForm" class="mb-10 grid gap-4 border-4 border-[#1a1a1a] bg-white p-5 shadow-[6px_6px_0_0_#1a1a1a] sm:grid-cols-2 sm:p-6" @submit.prevent="createVenue"><h2 class="sm:col-span-2 text-2xl font-bold uppercase">Create venue</h2><label class="font-bold uppercase">Name<input v-model.trim="form.name" required class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label><label class="font-bold uppercase">City<input v-model.trim="form.city" required class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label><label class="font-bold uppercase sm:col-span-2">Address<input v-model.trim="form.address" required class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label><label class="font-bold uppercase">Capacity<input v-model.number="form.capacity" required min="1" type="number" class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label><label class="font-bold uppercase">Description<textarea v-model.trim="form.description" class="mt-2 min-h-24 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label><button :disabled="isSaving" class="sm:col-span-2 bg-[#05f] px-5 py-3 font-bold uppercase text-white disabled:opacity-50">{{ isSaving ? 'Creating…' : 'Create venue' }}</button></form><p v-if="errorMessage" class="mb-6 border-2 border-[#e63b2e] bg-white p-4 font-bold text-[#e63b2e]">{{ errorMessage }}</p><section class="mb-10 grid grid-cols-1 gap-5 sm:grid-cols-3 sm:mb-12"><div class="border-2 border-[#1a1a1a] bg-[#ffcc00] p-5 shadow-[4px_4px_0_0_#1a1a1a]"><p class="mb-2 text-sm font-bold uppercase">Total venues</p><p class="text-4xl font-bold">{{ summary.totalVenues }}</p></div><div class="border-2 border-[#1a1a1a] bg-white p-5 shadow-[4px_4px_0_0_#1a1a1a]"><p class="mb-2 text-sm font-bold uppercase">Active events</p><p class="text-4xl font-bold">{{ summary.activeEvents }}</p></div><div class="border-2 border-[#1a1a1a] bg-[#05f] p-5 text-white shadow-[4px_4px_0_0_#1a1a1a]"><p class="mb-2 text-sm font-bold uppercase">Venue revenue</p><p class="text-4xl font-bold">{{ formatCurrency(summary.revenue) }}</p></div></section><section class="overflow-hidden border-2 border-[#1a1a1a] bg-white shadow-[8px_8px_0_0_#1a1a1a]"><div v-if="isLoading" class="p-8 font-bold uppercase">Loading venues…</div><div v-else-if="venues.length === 0" class="p-8 font-bold uppercase">No venues yet. Create your first venue above.</div><div v-else class="divide-y-2 divide-[#1a1a1a]"><article v-for="venue in venues" :key="venue.id" class="grid grid-cols-1 gap-4 p-5 md:grid-cols-[1fr_auto_auto] md:items-center"><div><h2 class="text-xl font-bold uppercase">{{ venue.name }}</h2><span :class="['mt-1 inline-block border border-[#1a1a1a] px-2 py-0.5 text-xs font-bold uppercase', venue.status === 'active' ? 'bg-[#ffcc00]' : 'bg-gray-200']">{{ venue.status }}</span><p class="mt-2 font-['Inter'] text-sm">{{ venue.address }}, {{ venue.city }} · {{ venue.capacity.toLocaleString() }} guests</p></div><div class="font-bold md:text-center">{{ venue.activeEvents }} active event{{ venue.activeEvents === 1 ? '' : 's' }}<br /><span class="text-sm">{{ formatCurrency(venue.revenue) }}</span></div><RouterLink :to="{ name: 'venue-details', params: { id: venue.slug || venue.id } }" class="bg-[#1a1a1a] px-4 py-2 text-center text-sm font-bold uppercase text-white">Manage venue</RouterLink></article></div></section></template></main><Footer /></div>
 </template>

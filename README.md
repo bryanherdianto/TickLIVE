@@ -56,6 +56,7 @@ CLOUDINARY_API_SECRET=your_api_secret
 
 ```env
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+VITE_API_BASE_URL=http://localhost:3000/api
 ```
 
 Leaflet and OpenStreetMap do not require a map API key for the basic map display. For production, follow the [OpenStreetMap tile usage policy](https://operations.osmfoundation.org/policies/tiles/) or use a dedicated tile provider if traffic becomes substantial.
