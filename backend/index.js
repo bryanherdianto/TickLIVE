@@ -1,25 +1,11 @@
-const express = require("express");
-require("dotenv").config();
-const cors = require("cors");
+const app = require("./src/app");
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT || 3000);
 
-app.use(
-	cors({
-		origin: ["http://localhost:3000", "https://tickify.bryanherdianto.site"],
-		methods: ["GET", "POST", "PUT", "DELETE"],
-		allowedHeaders: ["Content-Type", "Authorization"],
-	}),
-);
+if (require.main === module) {
+	app.listen(PORT, () => {
+		console.log(`Tickify API is running on port ${PORT}`);
+	});
+}
 
-app.use(express.json());
-app.use("/user", require("./src/routes/user.routes"));
-app.use("/seat", require("./src/routes/seat.routes"));
-app.use("/ticket", require("./src/routes/ticket.routes"));
-app.use("/event", require("./src/routes/event.routes"));
-app.use("/location", require("./src/routes/location.routes"));
-
-app.listen(PORT, () => {
-	console.log(`Server is running on port ${PORT}`);
-});
+module.exports = app;

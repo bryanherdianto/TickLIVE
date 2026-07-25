@@ -5,14 +5,14 @@ Tickify is an event-ticketing platform where visitors can browse events, choose 
 ## Features and services
 
 - Authentication is provided by Clerk.
-- Event and ticket data is stored in PostgreSQL.
+- Event, venue, seat, ticket, and organizer data is stored in PostgreSQL.
 - Venue images are uploaded to Cloudinary.
 - Venue maps use Leaflet with OpenStreetMap data. A Google Maps API key is **not** required.
 
 ## Project structure
 
 ```
-tick-live/
+tickify/
 ├── backend/       # Express API and PostgreSQL access
 ├── frontend/      # Vue 3 and Vite web application
 └── doc/           # Database dump and project diagrams
@@ -38,7 +38,15 @@ PORT=3000
 # PostgreSQL connection URI
 PG_CONNECTION_STRING=postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require
 
-# Required when creating or updating venue images
+# Required for protected organizer and ticket endpoints. Keep this server-only.
+CLERK_SECRET_KEY=sk_test_...
+# Use the same value as frontend's VITE_CLERK_PUBLISHABLE_KEY.
+CLERK_PUBLISHABLE_KEY=pk_test_...
+
+# Allowed frontend origins, separated by commas.
+FRONTEND_ORIGIN=http://localhost:5173,http://localhost:3000
+
+# Required only when uploading an image file through the API.
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
@@ -64,6 +72,13 @@ cd ../frontend
 npm install
 ```
 
+Reset the database once before starting the backend. This intentionally removes the legacy schema and its data, then creates the frontend-aligned Tickify schema:
+
+```sh
+cd backend
+npm run db:reset
+```
+
 Start the backend from the `backend` directory:
 
 ```sh
@@ -78,9 +93,24 @@ npm run dev
 
 The backend listens on port `3000` by default. The frontend development server prints its local URL after it starts.
 
-## Database
+## Backend API
 
-An initial PostgreSQL dump is available at [`doc/dumpfile.sql`](doc/dumpfile.sql).
+All API routes use the `/api` prefix and return `{ success, data }`. Public screens can use:
+
+- `GET /api/events` — event discovery with `search`, `category`, `city`, `from`, `to`, `minPrice`, and `maxPrice` filters
+- `GET /api/events/:idOrSlug` and `GET /api/events/:idOrSlug/seats`
+- `GET /api/venues` and `GET /api/venues/:idOrSlug`
+
+Clerk-authenticated routes support the account and organizer screens:
+
+- `PUT /api/me`, `GET /api/me/tickets`, and `POST /api/tickets`
+- `GET /api/me/organizer/summary`
+- `GET|POST /api/me/events` and `PATCH|DELETE /api/me/events/:id`
+- `GET|POST /api/me/venues` and `PATCH|DELETE /api/me/venues/:id`
+
+`POST /api/tickets` creates a 15-minute seat hold. It deliberately does not mark a ticket as paid; connect a payment provider webhook before confirming payment and issuing booked tickets. Image-creation and update endpoints accept an optional `image` file (uploaded to Cloudinary) or an `imageUrl` field.
+
+The old dump at [`doc/dumpfile.sql`](doc/dumpfile.sql) is legacy reference material only. The active schema is [`backend/db/reset.sql`](backend/db/reset.sql).
 
 ## Project diagrams
 
