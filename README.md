@@ -14,8 +14,7 @@ Tickify is an event-ticketing platform where visitors can browse events, choose 
 ```
 tickify/
 ├── backend/       # Express API and PostgreSQL access
-├── frontend/      # Vue 3 and Vite web application
-└── doc/           # Database dump and project diagrams
+└── frontend/      # Vue 3 and Vite web application
 ```
 
 ## Prerequisites
@@ -111,21 +110,7 @@ Clerk-authenticated routes support the account and organizer screens:
 
 `POST /api/tickets` creates a 15-minute seat hold. It deliberately does not mark a ticket as paid; connect a payment provider webhook before confirming payment and issuing booked tickets. Image-creation and update endpoints accept an optional `image` file (uploaded to Cloudinary) or an `imageUrl` field.
 
-The old dump at [`doc/dumpfile.sql`](doc/dumpfile.sql) is legacy reference material only. The active schema is [`backend/db/reset.sql`](backend/db/reset.sql).
-
-## Project diagrams
-
-### UML
-
-![UML](https://i.imgur.com/5ViikZR.png)
-
-### ERD
-
-![ERD](https://i.imgur.com/YizUSKt.png)
-
-### Flowchart
-
-![Flowchart](https://i.imgur.com/gkXQoUj.png)
+The active database schema is [`backend/db/reset.sql`](backend/db/reset.sql).
 
 ## Contributors
 
