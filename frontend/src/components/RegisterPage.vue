@@ -273,7 +273,8 @@ const handleGoogleLogin = async () => {
 					@submit.prevent="handleVerifyEmail"
 				>
 					<p class="text-sm font-['Inter'] font-bold leading-relaxed">
-						We sent a verification code to <strong>{{ email }}</strong>. Enter it below to activate your account.
+						We sent a verification code to <strong>{{ email }}</strong
+						>. Enter it below to activate your account.
 					</p>
 					<div>
 						<label

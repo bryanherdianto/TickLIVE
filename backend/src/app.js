@@ -8,13 +8,16 @@ const { notFound, errorHandler } = require("./middleware/error-handler");
 const app = express();
 
 if (!env.clerkSecretKey || !env.clerkPublishableKey) {
-	throw new Error("Missing required environment variable(s): CLERK_SECRET_KEY, CLERK_PUBLISHABLE_KEY");
+	throw new Error(
+		"Missing required environment variable(s): CLERK_SECRET_KEY, CLERK_PUBLISHABLE_KEY",
+	);
 }
 
 app.use(
 	cors({
 		origin(origin, callback) {
-			if (!origin || env.frontendOrigins.includes(origin)) return callback(null, true);
+			if (!origin || env.frontendOrigins.includes(origin))
+				return callback(null, true);
 			return callback(new Error("Origin is not allowed by CORS."));
 		},
 		methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
@@ -22,12 +25,16 @@ app.use(
 	}),
 );
 app.use(express.json({ limit: "1mb" }));
-app.use(clerkMiddleware({
-	secretKey: env.clerkSecretKey,
-	publishableKey: env.clerkPublishableKey,
-}));
+app.use(
+	clerkMiddleware({
+		secretKey: env.clerkSecretKey,
+		publishableKey: env.clerkPublishableKey,
+	}),
+);
 
-app.get("/", (req, res) => res.json({ success: true, data: { name: "Tickify API" } }));
+app.get("/", (req, res) =>
+	res.json({ success: true, data: { name: "Tickify API" } }),
+);
 app.use("/api", apiRoutes);
 app.use(notFound);
 app.use(errorHandler);

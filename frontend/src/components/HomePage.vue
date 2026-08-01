@@ -26,9 +26,13 @@ const imgVenue = "/imgVenue.webp";
 		<section
 			class="max-w-360 mx-auto w-full px-4 sm:px-6 pt-4 sm:pt-6 pb-16 sm:pb-24 relative overflow-hidden font-['Space_Grotesk']"
 		>
-			<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 lg:min-h-124">
+			<div
+				class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 lg:min-h-124"
+			>
 				<!-- Left: Text content -->
-				<div class="lg:col-span-7 flex flex-col justify-center gap-6 lg:gap-8 z-10">
+				<div
+					class="lg:col-span-7 flex flex-col justify-center gap-6 lg:gap-8 z-10"
+				>
 					<div class="relative h-48 sm:h-64 flex flex-col justify-center">
 						<h1
 							class="text-6xl sm:text-[128px] leading-none font-bold tracking-tighter uppercase whitespace-nowrap"
@@ -76,10 +80,10 @@ const imgVenue = "/imgVenue.webp";
 					<div
 						class="bg-[#05f] border-4 border-[#1a1a1a] shadow-[8px_8px_0px_0px_#1a1a1a] w-full p-1 relative z-0"
 					>
-					<div
-						class="relative aspect-[4/5] md:aspect-auto md:h-119 w-full bg-cover bg-center grayscale mix-blend-luminosity"
-						:style="{ backgroundImage: 'url(' + imgHeroBg + ')' }"
-					></div>
+						<div
+							class="relative aspect-[4/5] md:aspect-auto md:h-119 w-full bg-cover bg-center grayscale mix-blend-luminosity"
+							:style="{ backgroundImage: 'url(' + imgHeroBg + ')' }"
+						></div>
 					</div>
 					<!-- Decorative element -->
 					<div
@@ -282,32 +286,32 @@ const imgVenue = "/imgVenue.webp";
 						<div
 							class="bg-[#f5f0e8] border-4 border-[#1a1a1a] shadow-[4px_4px_0px_0px_#1a1a1a] p-1 flex flex-col sm:flex-row group overflow-hidden cursor-pointer hover:-translate-y-1 transition-transform"
 						>
-						<div class="sm:w-50 bg-[#e63b2e] relative">
-							<div
-								class="absolute inset-0 bg-cover bg-center grayscale mix-blend-luminosity"
-								:style="{ backgroundImage: 'url(' + imgTrending2 + ')' }"
-							></div>
-						</div>
-						<div class="flex-1 p-4 sm:p-6 flex flex-col justify-between">
-							<div>
-								<span
-									class="bg-[#fc0] border-2 border-[#1a1a1a] px-2 py-1 text-xs font-bold uppercase mb-2 inline-block"
-									>Art Exhibit</span
+							<div class="sm:w-50 bg-[#e63b2e] relative">
+								<div
+									class="absolute inset-0 bg-cover bg-center grayscale mix-blend-luminosity"
+									:style="{ backgroundImage: 'url(' + imgTrending2 + ')' }"
+								></div>
+							</div>
+							<div class="flex-1 p-4 sm:p-6 flex flex-col justify-between">
+								<div>
+									<span
+										class="bg-[#fc0] border-2 border-[#1a1a1a] px-2 py-1 text-xs font-bold uppercase mb-2 inline-block"
+										>Art Exhibit</span
+									>
+									<h3 class="font-bold text-2xl uppercase mb-2">
+										NEO-PIXEL 2024
+									</h3>
+									<p class="font-bold font-['Inter'] text-sm pb-4">
+										Exploring the boundary of digital and physical.
+									</p>
+								</div>
+								<div
+									class="border-t-2 border-[#1a1a1a]/10 pt-4 flex justify-between items-center"
 								>
-								<h3 class="font-bold text-2xl uppercase mb-2">
-									NEO-PIXEL 2024
-								</h3>
-								<p class="font-bold font-['Inter'] text-sm pb-4">
-									Exploring the boundary of digital and physical.
-								</p>
+									<span class="font-bold text-lg uppercase">€15</span>
+									<span class="text-xl">➔</span>
+								</div>
 							</div>
-							<div
-								class="border-t-2 border-[#1a1a1a]/10 pt-4 flex justify-between items-center"
-							>
-								<span class="font-bold text-lg uppercase">€15</span>
-								<span class="text-xl">➔</span>
-							</div>
-						</div>
 						</div>
 					</RouterLink>
 
@@ -315,32 +319,32 @@ const imgVenue = "/imgVenue.webp";
 						<div
 							class="bg-[#f5f0e8] border-4 border-[#1a1a1a] shadow-[4px_4px_0px_0px_#1a1a1a] p-1 flex flex-col sm:flex-row group overflow-hidden cursor-pointer hover:-translate-y-1 transition-transform"
 						>
-						<div class="sm:w-50 bg-[#05f] relative">
-							<div
-								class="absolute inset-0 bg-cover bg-center grayscale mix-blend-luminosity"
-								:style="{ backgroundImage: 'url(' + imgTrending3 + ')' }"
-							></div>
-						</div>
-						<div class="flex-1 p-4 sm:p-6 flex flex-col justify-between">
-							<div>
-								<span
-									class="bg-[#05f] text-white border-2 border-[#1a1a1a] px-2 py-1 text-xs font-bold uppercase mb-2 inline-block"
-									>Sports</span
+							<div class="sm:w-50 bg-[#05f] relative">
+								<div
+									class="absolute inset-0 bg-cover bg-center grayscale mix-blend-luminosity"
+									:style="{ backgroundImage: 'url(' + imgTrending3 + ')' }"
+								></div>
+							</div>
+							<div class="flex-1 p-4 sm:p-6 flex flex-col justify-between">
+								<div>
+									<span
+										class="bg-[#05f] text-white border-2 border-[#1a1a1a] px-2 py-1 text-xs font-bold uppercase mb-2 inline-block"
+										>Sports</span
+									>
+									<h3 class="font-bold text-2xl uppercase mb-2">
+										STREET CUP FINALS
+									</h3>
+									<p class="font-bold font-['Inter'] text-sm pb-4">
+										The ultimate underground soccer showdown.
+									</p>
+								</div>
+								<div
+									class="border-t-2 border-[#1a1a1a]/10 pt-4 flex justify-between items-center"
 								>
-								<h3 class="font-bold text-2xl uppercase mb-2">
-									STREET CUP FINALS
-								</h3>
-								<p class="font-bold font-['Inter'] text-sm pb-4">
-									The ultimate underground soccer showdown.
-								</p>
+									<span class="font-bold text-lg uppercase">€20</span>
+									<span class="text-xl">➔</span>
+								</div>
 							</div>
-							<div
-								class="border-t-2 border-[#1a1a1a]/10 pt-4 flex justify-between items-center"
-							>
-								<span class="font-bold text-lg uppercase">€20</span>
-								<span class="text-xl">➔</span>
-							</div>
-						</div>
 						</div>
 					</RouterLink>
 				</div>

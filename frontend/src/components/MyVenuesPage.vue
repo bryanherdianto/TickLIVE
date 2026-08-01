@@ -8,16 +8,363 @@ import { useApi } from "@/lib/api";
 import { formatCurrency } from "@/lib/format";
 
 type Summary = { totalVenues: number; activeEvents: number; revenue: string };
-type Venue = { id: string; name: string; slug: string; city: string; address: string; capacity: number; status: "active" | "inactive"; activeEvents: number; revenue: string };
-const api = useApi(); const { isLoaded, isSignedIn } = useAuth();
+type Venue = {
+	id: string;
+	name: string;
+	slug: string;
+	city: string;
+	address: string;
+	capacity: number;
+	status: "active" | "inactive";
+	activeEvents: number;
+	revenue: string;
+};
+const api = useApi();
+const { isLoaded, isSignedIn } = useAuth();
 const summary = ref<Summary>({ totalVenues: 0, activeEvents: 0, revenue: "0" });
-const venues = ref<Venue[]>([]); const isLoading = ref(false); const isSaving = ref(false); const errorMessage = ref(""); const showForm = ref(false);
-const form = ref({ name: "", address: "", city: "", capacity: 100, description: "", audioSystem: "", lightingSystem: "", stageAreaSqm: null as number | null, latitude: null as number | null, longitude: null as number | null });
-async function loadVenues() { if (!isSignedIn.value) return; isLoading.value = true; errorMessage.value = ""; try { const [summaryData, venuesData] = await Promise.all([api<Summary>("/me/organizer/summary"), api<Venue[]>("/me/venues")]); summary.value = summaryData; venues.value = venuesData; } catch (error) { errorMessage.value = error instanceof Error ? error.message : "Unable to load your venues."; } finally { isLoading.value = false; } }
-async function createVenue() { isSaving.value = true; errorMessage.value = ""; try { const payload: Record<string, unknown> = { ...form.value }; if (!payload.audioSystem) delete payload.audioSystem; if (!payload.lightingSystem) delete payload.lightingSystem; if (!payload.stageAreaSqm) delete payload.stageAreaSqm; if (!payload.latitude) delete payload.latitude; if (!payload.longitude) delete payload.longitude; await api<Venue>("/me/venues", { method: "POST", body: payload }); form.value = { name: "", address: "", city: "", capacity: 100, description: "", audioSystem: "", lightingSystem: "", stageAreaSqm: null, latitude: null, longitude: null }; showForm.value = false; await loadVenues(); } catch (error) { errorMessage.value = error instanceof Error ? error.message : "Unable to create your venue."; } finally { isSaving.value = false; } }
-onMounted(loadVenues); watch(isSignedIn, loadVenues);
+const venues = ref<Venue[]>([]);
+const isLoading = ref(false);
+const isSaving = ref(false);
+const errorMessage = ref("");
+const showForm = ref(false);
+type VenueImage = { id: number; file: File | null; altText: string };
+let rowId = 0;
+function emptyForm() {
+	return {
+		name: "",
+		address: "",
+		city: "",
+		capacity: 100,
+		description: "",
+		audioSystem: "",
+		lightingSystem: "",
+		stageAreaSqm: null as number | null,
+		latitude: null as number | null,
+		longitude: null as number | null,
+		image: null as File | null,
+		images: [] as VenueImage[],
+	};
+}
+const form = ref(emptyForm());
+function pickFile(payload: globalThis.Event) {
+	const input = payload.target as HTMLInputElement;
+	return input.files?.[0] || null;
+}
+function addImage() {
+	form.value.images.push({ id: ++rowId, file: null, altText: "" });
+}
+function removeImage(index: number) {
+	form.value.images.splice(index, 1);
+}
+async function loadVenues() {
+	if (!isSignedIn.value) return;
+	isLoading.value = true;
+	errorMessage.value = "";
+	try {
+		const [summaryData, venuesData] = await Promise.all([
+			api<Summary>("/me/organizer/summary"),
+			api<Venue[]>("/me/venues"),
+		]);
+		summary.value = summaryData;
+		venues.value = venuesData;
+	} catch (error) {
+		errorMessage.value =
+			error instanceof Error ? error.message : "Unable to load your venues.";
+	} finally {
+		isLoading.value = false;
+	}
+}
+async function createVenue() {
+	// Rows without a file are dropped first so the surviving indexes line up with the
+	// galleryImage_<i> field names the backend matches on.
+	const images = form.value.images.filter((image) => image.file);
+	const body = new FormData();
+	const append = (key: string, value: string | number | null) => {
+		if (value !== null && value !== "") body.append(key, String(value));
+	};
+	append("name", form.value.name);
+	append("address", form.value.address);
+	append("city", form.value.city);
+	append("capacity", form.value.capacity);
+	append("description", form.value.description);
+	append("audioSystem", form.value.audioSystem);
+	append("lightingSystem", form.value.lightingSystem);
+	append("stageAreaSqm", form.value.stageAreaSqm);
+	append("latitude", form.value.latitude);
+	append("longitude", form.value.longitude);
+	body.append(
+		"images",
+		JSON.stringify(
+			images.map((image) => ({ altText: image.altText.trim() || null })),
+		),
+	);
+	if (form.value.image) body.append("image", form.value.image);
+	images.forEach((image, index) => {
+		if (image.file) body.append(`galleryImage_${index}`, image.file);
+	});
+	isSaving.value = true;
+	errorMessage.value = "";
+	try {
+		await api<Venue>("/me/venues", { method: "POST", body });
+		form.value = emptyForm();
+		showForm.value = false;
+		await loadVenues();
+	} catch (error) {
+		errorMessage.value =
+			error instanceof Error ? error.message : "Unable to create your venue.";
+	} finally {
+		isSaving.value = false;
+	}
+}
+onMounted(loadVenues);
+watch(isSignedIn, loadVenues);
 </script>
 
 <template>
-	<div class="min-h-screen bg-[#f5f0e8] font-['Space_Grotesk'] text-[#1a1a1a]"><Header /><main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12"><section class="mb-10 flex flex-col gap-6 lg:mb-12 lg:flex-row lg:items-end lg:justify-between"><div><p class="mb-2 font-bold uppercase tracking-widest text-[#05f]">Organizer dashboard</p><h1 class="text-5xl font-bold uppercase leading-none sm:text-7xl md:text-[96px]">My Venues</h1><p class="mt-5 max-w-2xl border-l-4 border-[#1a1a1a] pl-4 font-['Inter'] sm:pl-6 sm:text-xl">Create and manage venue listings, review active events, and follow the revenue they generate.</p></div><button v-if="isSignedIn" type="button" class="bg-[#05f] px-6 py-4 font-bold uppercase text-white shadow-[4px_4px_0_0_#1a1a1a]" @click="showForm = !showForm">{{ showForm ? 'Close form' : '+ Create venue' }}</button></section><div v-if="!isLoaded" class="border-2 border-[#1a1a1a] bg-white p-6 font-bold uppercase">Loading account…</div><section v-else-if="!isSignedIn" class="border-4 border-[#1a1a1a] bg-white p-8"><h2 class="mb-4 text-2xl font-bold uppercase">Sign in to manage venues</h2><RouterLink :to="{ name: 'login', query: { redirect: '/my-venues' } }" class="inline-block bg-[#e63b2e] px-5 py-3 font-bold uppercase text-white">Sign in</RouterLink></section><template v-else><form v-if="showForm" class="mb-10 grid gap-4 border-4 border-[#1a1a1a] bg-white p-5 shadow-[6px_6px_0_0_#1a1a1a] sm:grid-cols-2 sm:p-6" @submit.prevent="createVenue"><h2 class="sm:col-span-2 text-2xl font-bold uppercase">Create venue</h2><label class="font-bold uppercase">Name<input v-model.trim="form.name" required class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label><label class="font-bold uppercase">City<input v-model.trim="form.city" required class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label><label class="font-bold uppercase sm:col-span-2">Address<input v-model.trim="form.address" required class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label><label class="font-bold uppercase">Capacity<input v-model.number="form.capacity" required min="1" type="number" class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label><label class="font-bold uppercase">Description<textarea v-model.trim="form.description" class="mt-2 min-h-24 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label><label class="font-bold uppercase">Audio system<input v-model.trim="form.audioSystem" placeholder="e.g. L-Acoustics K2 line array" class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label><label class="font-bold uppercase">Lighting system<input v-model.trim="form.lightingSystem" placeholder="e.g. Martin MAC Viper rig" class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label><label class="font-bold uppercase">Stage area (m²)<input v-model.number="form.stageAreaSqm" min="0" type="number" placeholder="Optional" class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label><label class="font-bold uppercase">Latitude<input v-model.number="form.latitude" step="any" type="number" placeholder="e.g. -6.2088" class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label><label class="font-bold uppercase">Longitude<input v-model.number="form.longitude" step="any" type="number" placeholder="e.g. 106.8456" class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label><button :disabled="isSaving" class="sm:col-span-2 bg-[#05f] px-5 py-3 font-bold uppercase text-white disabled:opacity-50">{{ isSaving ? 'Creating…' : 'Create venue' }}</button></form><p v-if="errorMessage" class="mb-6 border-2 border-[#e63b2e] bg-white p-4 font-bold text-[#e63b2e]">{{ errorMessage }}</p><section class="mb-10 grid grid-cols-1 gap-5 sm:grid-cols-3 sm:mb-12"><div class="border-2 border-[#1a1a1a] bg-[#ffcc00] p-5 shadow-[4px_4px_0_0_#1a1a1a]"><p class="mb-2 text-sm font-bold uppercase">Total venues</p><p class="text-4xl font-bold">{{ summary.totalVenues }}</p></div><div class="border-2 border-[#1a1a1a] bg-white p-5 shadow-[4px_4px_0_0_#1a1a1a]"><p class="mb-2 text-sm font-bold uppercase">Active events</p><p class="text-4xl font-bold">{{ summary.activeEvents }}</p></div><div class="border-2 border-[#1a1a1a] bg-[#05f] p-5 text-white shadow-[4px_4px_0_0_#1a1a1a]"><p class="mb-2 text-sm font-bold uppercase">Venue revenue</p><p class="text-4xl font-bold">{{ formatCurrency(summary.revenue) }}</p></div></section><section class="overflow-hidden border-2 border-[#1a1a1a] bg-white shadow-[8px_8px_0_0_#1a1a1a]"><div v-if="isLoading" class="p-8 font-bold uppercase">Loading venues…</div><div v-else-if="venues.length === 0" class="p-8 font-bold uppercase">No venues yet. Create your first venue above.</div><div v-else class="divide-y-2 divide-[#1a1a1a]"><article v-for="venue in venues" :key="venue.id" class="grid grid-cols-1 gap-4 p-5 md:grid-cols-[1fr_auto_auto] md:items-center"><div><h2 class="text-xl font-bold uppercase">{{ venue.name }}</h2><span :class="['mt-1 inline-block border border-[#1a1a1a] px-2 py-0.5 text-xs font-bold uppercase', venue.status === 'active' ? 'bg-[#ffcc00]' : 'bg-gray-200']">{{ venue.status }}</span><p class="mt-2 font-['Inter'] text-sm">{{ venue.address }}, {{ venue.city }} · {{ venue.capacity.toLocaleString() }} guests</p></div><div class="font-bold md:text-center">{{ venue.activeEvents }} active event{{ venue.activeEvents === 1 ? '' : 's' }}<br /><span class="text-sm">{{ formatCurrency(venue.revenue) }}</span></div><RouterLink :to="{ name: 'venue-details', params: { id: venue.slug || venue.id } }" class="bg-[#1a1a1a] px-4 py-2 text-center text-sm font-bold uppercase text-white">Manage venue</RouterLink></article></div></section></template></main><Footer /></div>
+	<div class="min-h-screen bg-[#f5f0e8] font-['Space_Grotesk'] text-[#1a1a1a]">
+		<Header />
+		<main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12">
+			<section
+				class="mb-10 flex flex-col gap-6 lg:mb-12 lg:flex-row lg:items-end lg:justify-between"
+			>
+				<div>
+					<p class="mb-2 font-bold uppercase tracking-widest text-[#05f]">
+						Organizer dashboard
+					</p>
+					<h1
+						class="text-5xl font-bold uppercase leading-none sm:text-7xl md:text-[96px]"
+					>
+						My Venues
+					</h1>
+					<p
+						class="mt-5 max-w-2xl border-l-4 border-[#1a1a1a] pl-4 font-['Inter'] sm:pl-6 sm:text-xl"
+					>
+						Create and manage venue listings, review active events, and follow
+						the revenue they generate.
+					</p>
+				</div>
+				<button
+					v-if="isSignedIn"
+					type="button"
+					class="bg-[#05f] px-6 py-4 font-bold uppercase text-white shadow-[4px_4px_0_0_#1a1a1a]"
+					@click="showForm = !showForm"
+				>
+					{{ showForm ? "Close form" : "+ Create venue" }}
+				</button>
+			</section>
+			<div
+				v-if="!isLoaded"
+				class="border-2 border-[#1a1a1a] bg-white p-6 font-bold uppercase"
+			>
+				Loading account…
+			</div>
+			<section
+				v-else-if="!isSignedIn"
+				class="border-4 border-[#1a1a1a] bg-white p-8"
+			>
+				<h2 class="mb-4 text-2xl font-bold uppercase">
+					Sign in to manage venues
+				</h2>
+				<RouterLink
+					:to="{ name: 'login', query: { redirect: '/my-venues' } }"
+					class="inline-block bg-[#e63b2e] px-5 py-3 font-bold uppercase text-white"
+					>Sign in</RouterLink
+				>
+			</section>
+			<template v-else
+				><form
+					v-if="showForm"
+					class="mb-10 grid gap-4 border-4 border-[#1a1a1a] bg-white p-5 shadow-[6px_6px_0_0_#1a1a1a] sm:grid-cols-2 sm:p-6"
+					@submit.prevent="createVenue"
+				>
+					<h2 class="sm:col-span-2 text-2xl font-bold uppercase">
+						Create venue
+					</h2>
+					<label class="font-bold uppercase"
+						>Name<input
+							v-model.trim="form.name"
+							required
+							class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label
+					><label class="font-bold uppercase"
+						>City<input
+							v-model.trim="form.city"
+							required
+							class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label
+					><label class="font-bold uppercase sm:col-span-2"
+						>Address<input
+							v-model.trim="form.address"
+							required
+							class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label
+					><label class="font-bold uppercase"
+						>Capacity<input
+							v-model.number="form.capacity"
+							required
+							min="1"
+							type="number"
+							class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label
+					><label class="font-bold uppercase"
+						>Description<textarea
+							v-model.trim="form.description"
+							class="mt-2 min-h-24 w-full border-2 border-[#1a1a1a] p-3 font-normal"
+						/></label
+					><label class="font-bold uppercase"
+						>Audio system<input
+							v-model.trim="form.audioSystem"
+							placeholder="e.g. L-Acoustics K2 line array"
+							class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label
+					><label class="font-bold uppercase"
+						>Lighting system<input
+							v-model.trim="form.lightingSystem"
+							placeholder="e.g. Martin MAC Viper rig"
+							class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label
+					><label class="font-bold uppercase"
+						>Stage area (m²)<input
+							v-model.number="form.stageAreaSqm"
+							min="0"
+							type="number"
+							placeholder="Optional"
+							class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label
+					><label class="font-bold uppercase"
+						>Latitude<input
+							v-model.number="form.latitude"
+							step="any"
+							type="number"
+							placeholder="e.g. -6.2088"
+							class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label
+					><label class="font-bold uppercase"
+						>Longitude<input
+							v-model.number="form.longitude"
+							step="any"
+							type="number"
+							placeholder="e.g. 106.8456"
+							class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label
+					><label class="font-bold uppercase sm:col-span-2"
+						>Cover image<input
+							type="file"
+							accept="image/*"
+							class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal"
+							@change="form.image = pickFile($event)"
+						/><span
+							class="mt-1 block text-xs font-normal normal-case text-gray-500"
+							>PNG or JPG, up to 5 MB.</span
+						></label
+					>
+					<fieldset class="sm:col-span-2 border-2 border-[#1a1a1a] p-4">
+						<legend class="px-2 font-bold uppercase">Gallery images</legend>
+						<div
+							v-for="(image, index) in form.images"
+							:key="image.id"
+							class="mb-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto]"
+						>
+							<input
+								type="file"
+								accept="image/*"
+								class="w-full border-2 border-[#1a1a1a] p-3"
+								@change="image.file = pickFile($event)"
+							/><input
+								v-model.trim="image.altText"
+								placeholder="Alt text (optional)"
+								class="w-full border-2 border-[#1a1a1a] p-3"
+							/><button
+								type="button"
+								class="border-2 border-[#1a1a1a] px-4 py-2 text-sm font-bold uppercase"
+								@click="removeImage(index)"
+							>
+								Remove
+							</button>
+						</div>
+						<button
+							type="button"
+							class="border-2 border-[#1a1a1a] bg-[#ffcc00] px-4 py-2 text-sm font-bold uppercase"
+							@click="addImage"
+						>
+							+ Add image
+						</button>
+					</fieldset>
+					<button
+						:disabled="isSaving"
+						class="sm:col-span-2 bg-[#05f] px-5 py-3 font-bold uppercase text-white disabled:opacity-50"
+					>
+						{{ isSaving ? "Creating…" : "Create venue" }}
+					</button>
+				</form>
+				<p
+					v-if="errorMessage"
+					class="mb-6 border-2 border-[#e63b2e] bg-white p-4 font-bold text-[#e63b2e]"
+				>
+					{{ errorMessage }}
+				</p>
+				<section class="mb-10 grid grid-cols-1 gap-5 sm:grid-cols-3 sm:mb-12">
+					<div
+						class="border-2 border-[#1a1a1a] bg-[#ffcc00] p-5 shadow-[4px_4px_0_0_#1a1a1a]"
+					>
+						<p class="mb-2 text-sm font-bold uppercase">Total venues</p>
+						<p class="text-4xl font-bold">{{ summary.totalVenues }}</p>
+					</div>
+					<div
+						class="border-2 border-[#1a1a1a] bg-white p-5 shadow-[4px_4px_0_0_#1a1a1a]"
+					>
+						<p class="mb-2 text-sm font-bold uppercase">Active events</p>
+						<p class="text-4xl font-bold">{{ summary.activeEvents }}</p>
+					</div>
+					<div
+						class="border-2 border-[#1a1a1a] bg-[#05f] p-5 text-white shadow-[4px_4px_0_0_#1a1a1a]"
+					>
+						<p class="mb-2 text-sm font-bold uppercase">Venue revenue</p>
+						<p class="text-4xl font-bold">
+							{{ formatCurrency(summary.revenue) }}
+						</p>
+					</div>
+				</section>
+				<section
+					class="overflow-hidden border-2 border-[#1a1a1a] bg-white shadow-[8px_8px_0_0_#1a1a1a]"
+				>
+					<div v-if="isLoading" class="p-8 font-bold uppercase">
+						Loading venues…
+					</div>
+					<div v-else-if="venues.length === 0" class="p-8 font-bold uppercase">
+						No venues yet. Create your first venue above.
+					</div>
+					<div v-else class="divide-y-2 divide-[#1a1a1a]">
+						<article
+							v-for="venue in venues"
+							:key="venue.id"
+							class="grid grid-cols-1 gap-4 p-5 md:grid-cols-[1fr_auto_auto] md:items-center"
+						>
+							<div>
+								<h2 class="text-xl font-bold uppercase">{{ venue.name }}</h2>
+								<span
+									:class="[
+										'mt-1 inline-block border border-[#1a1a1a] px-2 py-0.5 text-xs font-bold uppercase',
+										venue.status === 'active' ? 'bg-[#ffcc00]' : 'bg-gray-200',
+									]"
+									>{{ venue.status }}</span
+								>
+								<p class="mt-2 font-['Inter'] text-sm">
+									{{ venue.address }}, {{ venue.city }} ·
+									{{ venue.capacity.toLocaleString() }} guests
+								</p>
+							</div>
+							<div class="font-bold md:text-center">
+								{{ venue.activeEvents }} active event{{
+									venue.activeEvents === 1 ? "" : "s"
+								}}<br /><span class="text-sm">{{
+									formatCurrency(venue.revenue)
+								}}</span>
+							</div>
+							<RouterLink
+								:to="{
+									name: 'venue-details',
+									params: { id: venue.slug || venue.id },
+								}"
+								class="bg-[#1a1a1a] px-4 py-2 text-center text-sm font-bold uppercase text-white"
+								>Manage venue</RouterLink
+							>
+						</article>
+					</div>
+				</section></template
+			>
+		</main>
+		<Footer />
+	</div>
 </template>

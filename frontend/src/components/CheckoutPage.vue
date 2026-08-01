@@ -7,14 +7,137 @@ import Header from "./Header.vue";
 import { useApi } from "@/lib/api";
 import { formatCurrency, formatEventDate } from "@/lib/format";
 
-type Ticket = { id: string; status: string; currency: string; total: string; expiresAt: string | null; eventTitle: string; startsAt: string; venueName: string; venueCity: string; seats: { id: string; label: string; zoneCode: string; price: string }[] };
-const route = useRoute(); const api = useApi(); const { isLoaded, isSignedIn } = useAuth();
-const ticket = ref<Ticket | null>(null); const isLoading = ref(false); const errorMessage = ref("");
-const ticketId = computed(() => typeof route.query.ticketId === "string" ? route.query.ticketId : "");
-async function loadTicket() { if (!isSignedIn.value || !ticketId.value) return; isLoading.value = true; errorMessage.value = ""; try { const tickets = await api<Ticket[]>("/me/tickets"); ticket.value = tickets.find((item) => item.id === ticketId.value) || null; if (!ticket.value) errorMessage.value = "This seat hold could not be found."; } catch (error) { errorMessage.value = error instanceof Error ? error.message : "Unable to load checkout."; } finally { isLoading.value = false; } }
-onMounted(loadTicket); watch([isSignedIn, ticketId], loadTicket);
+type Ticket = {
+	id: string;
+	status: string;
+	currency: string;
+	total: string;
+	expiresAt: string | null;
+	eventTitle: string;
+	startsAt: string;
+	venueName: string;
+	venueCity: string;
+	seats: { id: string; label: string; zoneCode: string; price: string }[];
+};
+const route = useRoute();
+const api = useApi();
+const { isLoaded, isSignedIn } = useAuth();
+const ticket = ref<Ticket | null>(null);
+const isLoading = ref(false);
+const errorMessage = ref("");
+const ticketId = computed(() =>
+	typeof route.query.ticketId === "string" ? route.query.ticketId : "",
+);
+async function loadTicket() {
+	if (!isSignedIn.value || !ticketId.value) return;
+	isLoading.value = true;
+	errorMessage.value = "";
+	try {
+		const tickets = await api<Ticket[]>("/me/tickets");
+		ticket.value = tickets.find((item) => item.id === ticketId.value) || null;
+		if (!ticket.value)
+			errorMessage.value = "This seat hold could not be found.";
+	} catch (error) {
+		errorMessage.value =
+			error instanceof Error ? error.message : "Unable to load checkout.";
+	} finally {
+		isLoading.value = false;
+	}
+}
+onMounted(loadTicket);
+watch([isSignedIn, ticketId], loadTicket);
 </script>
 
 <template>
-	<div class="min-h-screen bg-[#f5f0e8] font-['Space_Grotesk'] text-[#1a1a1a]"><Header /><main class="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12"><h1 class="mb-8 text-5xl font-bold uppercase sm:text-7xl">Checkout</h1><div v-if="!isLoaded || isLoading" class="border-4 border-[#1a1a1a] bg-white p-8 font-bold uppercase">Loading checkout…</div><section v-else-if="!isSignedIn" class="border-4 border-[#1a1a1a] bg-white p-8"><h2 class="mb-4 text-2xl font-bold uppercase">Sign in to continue</h2><RouterLink :to="{ name: 'login', query: { redirect: route.fullPath } }" class="inline-block bg-[#e63b2e] px-5 py-3 font-bold uppercase text-white">Sign in</RouterLink></section><section v-else-if="errorMessage || !ticket" class="border-4 border-[#e63b2e] bg-white p-8 font-bold uppercase text-[#e63b2e]">{{ errorMessage || 'No seat hold was selected.' }}</section><section v-else class="grid gap-8 lg:grid-cols-[1fr_22rem]"><div class="border-4 border-[#1a1a1a] bg-white p-5 shadow-[8px_8px_0_0_#1a1a1a] sm:p-8"><h2 class="mb-5 text-3xl font-bold uppercase">Your seat hold</h2><p class="mb-2 text-xl font-bold">{{ ticket.eventTitle }}</p><p class="mb-6 font-['Inter']">{{ formatEventDate(ticket.startsAt) }} · {{ ticket.venueName }}, {{ ticket.venueCity }}</p><ul class="space-y-3 border-t-2 border-[#1a1a1a] pt-5"><li v-for="seat in ticket.seats" :key="seat.id" class="flex justify-between"><span class="font-bold">Seat {{ seat.label }} · Zone {{ seat.zoneCode }}</span><span>{{ formatCurrency(seat.price, ticket.currency) }}</span></li></ul><div class="mt-8 border-2 border-[#e63b2e] bg-[#ffdad6] p-4 font-['Inter'] text-sm"><b class="block font-['Space_Grotesk'] uppercase">Payment integration pending</b>Tickify is holding these seats for 15 minutes. A payment provider must be connected before this order can be confirmed and issued as a paid ticket.</div></div><aside class="h-fit border-4 border-[#1a1a1a] bg-[#1a1a1a] p-6 text-white shadow-[8px_8px_0_0_#ffcc00]"><h2 class="mb-5 border-b-2 border-gray-700 pb-3 text-2xl font-bold uppercase">Order summary</h2><div class="flex justify-between text-lg font-bold text-[#ffcc00]"><span>Total</span><span>{{ formatCurrency(ticket.total, ticket.currency) }}</span></div><p v-if="ticket.expiresAt" class="mt-5 text-sm text-gray-300">Seat hold expires {{ formatEventDate(ticket.expiresAt, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) }}.</p><RouterLink to="/tickets" class="mt-6 block bg-[#ffcc00] px-4 py-3 text-center font-bold uppercase text-[#1a1a1a]">View my tickets</RouterLink></aside></section></main><Footer /></div>
+	<div class="min-h-screen bg-[#f5f0e8] font-['Space_Grotesk'] text-[#1a1a1a]">
+		<Header />
+		<main class="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+			<h1 class="mb-8 text-5xl font-bold uppercase sm:text-7xl">Checkout</h1>
+			<div
+				v-if="!isLoaded || isLoading"
+				class="border-4 border-[#1a1a1a] bg-white p-8 font-bold uppercase"
+			>
+				Loading checkout…
+			</div>
+			<section
+				v-else-if="!isSignedIn"
+				class="border-4 border-[#1a1a1a] bg-white p-8"
+			>
+				<h2 class="mb-4 text-2xl font-bold uppercase">Sign in to continue</h2>
+				<RouterLink
+					:to="{ name: 'login', query: { redirect: route.fullPath } }"
+					class="inline-block bg-[#e63b2e] px-5 py-3 font-bold uppercase text-white"
+					>Sign in</RouterLink
+				>
+			</section>
+			<section
+				v-else-if="errorMessage || !ticket"
+				class="border-4 border-[#e63b2e] bg-white p-8 font-bold uppercase text-[#e63b2e]"
+			>
+				{{ errorMessage || "No seat hold was selected." }}
+			</section>
+			<section v-else class="grid gap-8 lg:grid-cols-[1fr_22rem]">
+				<div
+					class="border-4 border-[#1a1a1a] bg-white p-5 shadow-[8px_8px_0_0_#1a1a1a] sm:p-8"
+				>
+					<h2 class="mb-5 text-3xl font-bold uppercase">Your seat hold</h2>
+					<p class="mb-2 text-xl font-bold">{{ ticket.eventTitle }}</p>
+					<p class="mb-6 font-['Inter']">
+						{{ formatEventDate(ticket.startsAt) }} · {{ ticket.venueName }},
+						{{ ticket.venueCity }}
+					</p>
+					<ul class="space-y-3 border-t-2 border-[#1a1a1a] pt-5">
+						<li
+							v-for="seat in ticket.seats"
+							:key="seat.id"
+							class="flex justify-between"
+						>
+							<span class="font-bold"
+								>Seat {{ seat.label }} · Zone {{ seat.zoneCode }}</span
+							><span>{{ formatCurrency(seat.price, ticket.currency) }}</span>
+						</li>
+					</ul>
+					<div
+						class="mt-8 border-2 border-[#e63b2e] bg-[#ffdad6] p-4 font-['Inter'] text-sm"
+					>
+						<b class="block font-['Space_Grotesk'] uppercase"
+							>Payment integration pending</b
+						>Tickify is holding these seats for 15 minutes. A payment provider
+						must be connected before this order can be confirmed and issued as a
+						paid ticket.
+					</div>
+				</div>
+				<aside
+					class="h-fit border-4 border-[#1a1a1a] bg-[#1a1a1a] p-6 text-white shadow-[8px_8px_0_0_#ffcc00]"
+				>
+					<h2
+						class="mb-5 border-b-2 border-gray-700 pb-3 text-2xl font-bold uppercase"
+					>
+						Order summary
+					</h2>
+					<div class="flex justify-between text-lg font-bold text-[#ffcc00]">
+						<span>Total</span
+						><span>{{ formatCurrency(ticket.total, ticket.currency) }}</span>
+					</div>
+					<p v-if="ticket.expiresAt" class="mt-5 text-sm text-gray-300">
+						Seat hold expires
+						{{
+							formatEventDate(ticket.expiresAt, {
+								month: "short",
+								day: "numeric",
+								hour: "numeric",
+								minute: "2-digit",
+							})
+						}}.
+					</p>
+					<RouterLink
+						to="/tickets"
+						class="mt-6 block bg-[#ffcc00] px-4 py-3 text-center font-bold uppercase text-[#1a1a1a]"
+						>View my tickets</RouterLink
+					>
+				</aside>
+			</section>
+		</main>
+		<Footer />
+	</div>
 </template>

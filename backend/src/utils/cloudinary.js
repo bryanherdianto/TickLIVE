@@ -18,7 +18,11 @@ function uploadImage(file, folder) {
 	if (!file) return Promise.resolve(null);
 	if (!configured) {
 		return Promise.reject(
-			httpError(503, "IMAGE_UPLOAD_UNAVAILABLE", "Cloudinary is not configured."),
+			httpError(
+				503,
+				"IMAGE_UPLOAD_UNAVAILABLE",
+				"Cloudinary is not configured.",
+			),
 		);
 	}
 

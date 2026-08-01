@@ -11,14 +11,20 @@ function errorHandler(error, req, res, next) {
 	if (error.code === "23505") {
 		return res.status(409).json({
 			success: false,
-			error: { code: "CONFLICT", message: "A record with that value already exists." },
+			error: {
+				code: "CONFLICT",
+				message: "A record with that value already exists.",
+			},
 		});
 	}
 
 	if (error.code === "22P02" || error.code === "23514") {
 		return res.status(400).json({
 			success: false,
-			error: { code: "INVALID_INPUT", message: "One or more values are invalid." },
+			error: {
+				code: "INVALID_INPUT",
+				message: "One or more values are invalid.",
+			},
 		});
 	}
 
@@ -33,7 +39,9 @@ function errorHandler(error, req, res, next) {
 		success: false,
 		error: {
 			code: error.code || "INTERNAL_ERROR",
-			message: error.expose ? error.message : "Something went wrong on the server.",
+			message: error.expose
+				? error.message
+				: "Something went wrong on the server.",
 		},
 	});
 }

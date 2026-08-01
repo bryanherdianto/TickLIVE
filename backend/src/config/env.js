@@ -4,7 +4,9 @@ const required = ["PG_CONNECTION_STRING"];
 const missing = required.filter((key) => !process.env[key]);
 
 if (missing.length > 0) {
-	throw new Error(`Missing required environment variable(s): ${missing.join(", ")}`);
+	throw new Error(
+		`Missing required environment variable(s): ${missing.join(", ")}`,
+	);
 }
 
 module.exports = {

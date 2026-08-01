@@ -61,7 +61,9 @@ const currentYear = new Date().getFullYear();
 
 			<div class="grid grid-cols-2 gap-12 xl:gap-24">
 				<div class="flex flex-col gap-4">
-					<h4 class="font-bold text-lg text-[#e63b2e] uppercase mb-1">Explore</h4>
+					<h4 class="font-bold text-lg text-[#e63b2e] uppercase mb-1">
+						Explore
+					</h4>
 					<RouterLink
 						to="/events"
 						class="font-bold text-sm text-[#f5f0e8] uppercase hover:underline"

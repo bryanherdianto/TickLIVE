@@ -31,7 +31,11 @@ const routes = [
 	{ path: "/my-venues", name: "my-venues", component: MyVenuesPage },
 	{ path: "/login", name: "login", component: LoginPage },
 	{ path: "/register", name: "register", component: RegisterPage },
-	{ path: "/forgot-password", name: "forgot-password", component: ForgotPasswordPage },
+	{
+		path: "/forgot-password",
+		name: "forgot-password",
+		component: ForgotPasswordPage,
+	},
 	{ path: "/sso-callback", name: "sso-callback", component: SsoCallbackPage },
 ];
 
