@@ -4,6 +4,7 @@
 
 BEGIN;
 
+DROP TABLE IF EXISTS payments CASCADE;
 DROP TABLE IF EXISTS ticket_seats CASCADE;
 DROP TABLE IF EXISTS tickets CASCADE;
 DROP TABLE IF EXISTS seats CASCADE;
@@ -16,6 +17,7 @@ DROP TABLE IF EXISTS locations CASCADE;
 DROP TABLE IF EXISTS app_users CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
+DROP TYPE IF EXISTS payment_status CASCADE;
 DROP TYPE IF EXISTS ticket_status CASCADE;
 DROP TYPE IF EXISTS seat_status CASCADE;
 DROP TYPE IF EXISTS event_status CASCADE;
@@ -29,6 +31,7 @@ CREATE TYPE venue_status AS ENUM ('active', 'inactive');
 CREATE TYPE event_status AS ENUM ('draft', 'published', 'cancelled', 'completed');
 CREATE TYPE seat_status AS ENUM ('available', 'held', 'booked', 'unavailable');
 CREATE TYPE ticket_status AS ENUM ('pending', 'paid', 'cancelled', 'refunded', 'expired');
+CREATE TYPE payment_status AS ENUM ('pending', 'settled', 'failed', 'expired', 'refunded');
 
 CREATE OR REPLACE FUNCTION set_updated_at()
 RETURNS TRIGGER AS $$
@@ -94,7 +97,8 @@ CREATE TABLE events (
   doors_at TIMESTAMPTZ,
   starts_at TIMESTAMPTZ NOT NULL,
   ends_at TIMESTAMPTZ,
-  currency CHAR(3) NOT NULL DEFAULT 'USD',
+  -- Midtrans settles in rupiah only, so IDR is the only currency the checkout accepts.
+  currency CHAR(3) NOT NULL DEFAULT 'IDR',
   status event_status NOT NULL DEFAULT 'draft',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -159,6 +163,25 @@ CREATE TABLE ticket_seats (
   UNIQUE (seat_id)
 );
 
+-- One row per payment attempt. Midtrans rejects a reused order_id, so a ticket whose first
+-- attempt failed needs a fresh row rather than a retry against the original order.
+CREATE TABLE payments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  ticket_id UUID NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
+  order_id TEXT NOT NULL UNIQUE,
+  provider TEXT NOT NULL DEFAULT 'midtrans',
+  status payment_status NOT NULL DEFAULT 'pending',
+  gross_amount NUMERIC(12, 2) NOT NULL CHECK (gross_amount >= 0),
+  currency CHAR(3) NOT NULL,
+  snap_token TEXT,
+  payment_type TEXT,
+  transaction_status TEXT,
+  fraud_status TEXT,
+  raw_notification JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE INDEX venues_city_idx ON venues(city);
 CREATE INDEX venues_owner_idx ON venues(owner_clerk_id);
 CREATE INDEX events_venue_idx ON events(venue_id);
@@ -167,11 +190,13 @@ CREATE INDEX events_public_listing_idx ON events(status, starts_at);
 CREATE INDEX seats_event_status_idx ON seats(event_id, status);
 CREATE INDEX tickets_customer_idx ON tickets(customer_clerk_id, created_at DESC);
 CREATE INDEX tickets_event_status_idx ON tickets(event_id, status);
+CREATE INDEX payments_ticket_idx ON payments(ticket_id, created_at DESC);
 
 CREATE TRIGGER app_users_updated_at BEFORE UPDATE ON app_users FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER venues_updated_at BEFORE UPDATE ON venues FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER events_updated_at BEFORE UPDATE ON events FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER seats_updated_at BEFORE UPDATE ON seats FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER tickets_updated_at BEFORE UPDATE ON tickets FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+CREATE TRIGGER payments_updated_at BEFORE UPDATE ON payments FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 COMMIT;

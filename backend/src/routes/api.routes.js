@@ -5,6 +5,15 @@ const { requireCurrentUser } = require("../middleware/auth");
 const { upload } = require("../middleware/upload");
 const { uploadImage } = require("../utils/cloudinary");
 const { httpError } = require("../utils/http-error");
+const env = require("../config/env");
+const {
+	createSnapTransaction,
+	getTransactionStatus,
+	verifyNotificationSignature,
+	resolveOutcome,
+	INSTANT_PAYMENTS,
+	SUPPORTED_CURRENCY,
+} = require("../utils/midtrans");
 const { createSlug } = require("../utils/slug");
 
 const router = express.Router();
@@ -33,6 +42,31 @@ function positiveNumber(value, name) {
 		);
 	}
 	return number;
+}
+
+// Rupiah has no minor unit and Midtrans rejects fractional amounts, so prices are whole numbers.
+function wholeNumber(value, name) {
+	const number = positiveNumber(value, name);
+	if (!Number.isInteger(number)) {
+		throw httpError(
+			400,
+			"VALIDATION_ERROR",
+			`${name} must be a whole number of ${SUPPORTED_CURRENCY}.`,
+		);
+	}
+	return number;
+}
+
+function supportedCurrency(value) {
+	const currency = String(value || SUPPORTED_CURRENCY).toUpperCase();
+	if (currency !== SUPPORTED_CURRENCY) {
+		throw httpError(
+			400,
+			"UNSUPPORTED_CURRENCY",
+			`Payments settle through Midtrans, which only supports ${SUPPORTED_CURRENCY}.`,
+		);
+	}
+	return currency;
 }
 
 function parseArray(value, fallback = []) {
@@ -281,14 +315,40 @@ router.put("/me", ...authenticated, async (req, res, next) => {
 	}
 });
 
+// Releasing a hold must also drop its ticket_seats rows. That table has UNIQUE (seat_id), so a
+// leftover row from an abandoned checkout would permanently block every future ticket from
+// including that seat, even once the seat itself is back to 'available'.
+async function releaseHeldSeats(ticketIds, client = db) {
+	if (ticketIds.length === 0) return;
+	await client.query(
+		`UPDATE seats SET status = 'available', hold_expires_at = NULL
+		 WHERE id IN (SELECT seat_id FROM ticket_seats WHERE ticket_id = ANY($1::uuid[])) AND status = 'held'`,
+		[ticketIds],
+	);
+	await client.query(
+		"DELETE FROM ticket_seats WHERE ticket_id = ANY($1::uuid[])",
+		[ticketIds],
+	);
+}
+
+// Expires every hold that has run out and frees the seats behind it.
+async function sweepExpiredHolds(client = db) {
+	const expired = await client.query(
+		"UPDATE tickets SET status = 'expired' WHERE status = 'pending' AND expires_at < NOW() RETURNING id",
+	);
+	await releaseHeldSeats(
+		expired.rows.map((row) => row.id),
+		client,
+	);
+	// Catches seats whose hold lapsed without a ticket behind them.
+	await client.query(
+		"UPDATE seats SET status = 'available', hold_expires_at = NULL WHERE status = 'held' AND hold_expires_at < NOW()",
+	);
+}
+
 router.get("/me/tickets", ...authenticated, async (req, res, next) => {
 	try {
-		await db.query(
-			"UPDATE seats SET status = 'available', hold_expires_at = NULL WHERE status = 'held' AND hold_expires_at < NOW()",
-		);
-		await db.query(
-			"UPDATE tickets SET status = 'expired' WHERE status = 'pending' AND expires_at < NOW()",
-		);
+		await sweepExpiredHolds();
 		const tickets = await db.query(
 			`SELECT t.id, t.status, t.currency, t.subtotal, t.fees, t.total, t.expires_at AS "expiresAt", t.created_at AS "createdAt",
 			e.id AS "eventId", e.title AS "eventTitle", e.slug AS "eventSlug", e.starts_at AS "startsAt", e.hero_image_url AS "heroImageUrl",
@@ -305,7 +365,8 @@ router.get("/me/tickets", ...authenticated, async (req, res, next) => {
 	}
 });
 
-// Holds seats for 15 minutes. A future payment webhook must confirm the ticket; this route never issues a paid ticket.
+// Holds seats for 15 minutes. Only a confirmed Midtrans payment issues the ticket; this route
+// never marks one paid.
 router.post("/tickets", ...authenticated, async (req, res, next) => {
 	try {
 		const seatIds = parseArray(req.body.seatIds);
@@ -320,10 +381,9 @@ router.post("/tickets", ...authenticated, async (req, res, next) => {
 			);
 		}
 		const ticket = await db.transaction(async (client) => {
-			await client.query(
-				"UPDATE seats SET status = 'available', hold_expires_at = NULL WHERE id = ANY($1::uuid[]) AND status = 'held' AND hold_expires_at < NOW()",
-				[seatIds],
-			);
+			// Clears lapsed holds first, including their ticket_seats rows, so seats abandoned
+			// mid-checkout can be selected again rather than staying locked by UNIQUE (seat_id).
+			await sweepExpiredHolds(client);
 			const seats = await client.query(
 				`SELECT s.id, s.event_id, s.price, s.status, e.currency, e.status AS event_status
 				 FROM seats s JOIN events e ON e.id = s.event_id WHERE s.id = ANY($1::uuid[]) FOR UPDATE`,
@@ -378,6 +438,252 @@ router.post("/tickets", ...authenticated, async (req, res, next) => {
 			return created.rows[0];
 		});
 		return ok(res, ticket, 201);
+	} catch (error) {
+		return next(error);
+	}
+});
+
+// Single place where a Midtrans result becomes a ticket outcome, shared by the webhook and
+// the browser-driven status check. Both paths must stay convergent, and this must be safe to
+// run repeatedly: Midtrans retries notifications, and serverless can process retries
+// concurrently, so every write is guarded on the row still being in the state it expects.
+async function applyPaymentOutcome(orderId, notification) {
+	return db.transaction(async (client) => {
+		const payment = await client.query(
+			"SELECT * FROM payments WHERE order_id = $1 FOR UPDATE",
+			[orderId],
+		);
+		if (payment.rowCount === 0) {
+			throw httpError(404, "PAYMENT_NOT_FOUND", "Unknown payment order.");
+		}
+		const record = payment.rows[0];
+		const outcome = resolveOutcome(notification);
+
+		// The callback body is attacker-controllable until proven otherwise, so a settlement
+		// only counts when the amount matches what we recorded when the order was created.
+		if (
+			outcome === "settled" &&
+			Number(notification.gross_amount) !== Number(record.gross_amount)
+		) {
+			throw httpError(
+				400,
+				"PAYMENT_AMOUNT_MISMATCH",
+				"Reported amount does not match this order.",
+			);
+		}
+
+		await client.query(
+			`UPDATE payments SET status = $2::payment_status, payment_type = COALESCE($3, payment_type),
+			 transaction_status = $4, fraud_status = $5, raw_notification = $6 WHERE id = $1`,
+			[
+				record.id,
+				outcome,
+				notification.payment_type || null,
+				notification.transaction_status || null,
+				notification.fraud_status || null,
+				notification,
+			],
+		);
+
+		if (outcome === "settled") {
+			const claimed = await client.query(
+				"UPDATE tickets SET status = 'paid', expires_at = NULL WHERE id = $1 AND status = 'pending' RETURNING id",
+				[record.ticket_id],
+			);
+			// Zero rows means a concurrent retry already issued this ticket; the seat update
+			// would be a no-op repeat, so skip it rather than re-running the write.
+			if (claimed.rowCount === 1) {
+				await client.query(
+					`UPDATE seats SET status = 'booked', hold_expires_at = NULL
+					 WHERE id IN (SELECT seat_id FROM ticket_seats WHERE ticket_id = $1)`,
+					[record.ticket_id],
+				);
+			}
+		} else if (outcome === "failed" || outcome === "expired") {
+			const released = await client.query(
+				"UPDATE tickets SET status = 'expired' WHERE id = $1 AND status = 'pending' RETURNING id",
+				[record.ticket_id],
+			);
+			if (released.rowCount === 1) {
+				await releaseHeldSeats([record.ticket_id], client);
+			}
+		}
+		return { orderId, outcome, ticketId: record.ticket_id };
+	});
+}
+
+async function payableTicket(ticketId, ownerId) {
+	const result = await db.query(
+		`SELECT t.*, e.title AS "eventTitle" FROM tickets t JOIN events e ON e.id = t.event_id
+		 WHERE t.id = $1 AND t.customer_clerk_id = $2`,
+		[ticketId, ownerId],
+	);
+	if (result.rowCount === 0) {
+		throw httpError(404, "TICKET_NOT_FOUND", "Ticket not found.");
+	}
+	return result.rows[0];
+}
+
+// Creates (or re-serves) a Snap token for a held ticket.
+router.post("/tickets/:id/pay", ...authenticated, async (req, res, next) => {
+	try {
+		const ticket = await payableTicket(req.params.id, req.authUserId);
+		if (ticket.status !== "pending") {
+			throw httpError(
+				409,
+				"TICKET_NOT_PAYABLE",
+				`This ticket is already ${ticket.status}.`,
+			);
+		}
+		const expiresAt = new Date(ticket.expires_at);
+		const millisecondsLeft = expiresAt.getTime() - Date.now();
+		if (millisecondsLeft <= 0) {
+			throw httpError(
+				409,
+				"TICKET_EXPIRED",
+				"This seat hold has expired. Please select seats again.",
+			);
+		}
+		supportedCurrency(ticket.currency);
+		const grossAmount = Number(ticket.total);
+		if (!Number.isInteger(grossAmount) || grossAmount < 1) {
+			throw httpError(
+				400,
+				"INVALID_AMOUNT",
+				`This ticket total cannot be charged: ${SUPPORTED_CURRENCY} amounts must be whole numbers of at least 1.`,
+			);
+		}
+
+		// Reuse a live token so reopening checkout does not strand a half-finished order.
+		const existing = await db.query(
+			`SELECT order_id AS "orderId", snap_token AS "snapToken" FROM payments
+			 WHERE ticket_id = $1 AND status = 'pending' AND snap_token IS NOT NULL
+			 ORDER BY created_at DESC LIMIT 1`,
+			[ticket.id],
+		);
+		if (existing.rowCount === 1) {
+			return ok(res, {
+				...existing.rows[0],
+				clientKey: env.midtrans.clientKey,
+			});
+		}
+
+		const attempts = await db.query(
+			"SELECT COUNT(*)::int AS count FROM payments WHERE ticket_id = $1",
+			[ticket.id],
+		);
+		// Midtrans rejects a reused order_id, so each attempt gets its own suffix.
+		const orderId = `TKF-${ticket.id}-${attempts.rows[0].count + 1}`;
+		const seats = await db.query(
+			`SELECT s.id, s.label, s.zone_code AS "zoneCode", ts.unit_price AS "unitPrice"
+			 FROM ticket_seats ts JOIN seats s ON s.id = ts.seat_id WHERE ts.ticket_id = $1 ORDER BY s.label`,
+			[ticket.id],
+		);
+		const customer = await db.query(
+			"SELECT email, first_name AS \"firstName\", last_name AS \"lastName\" FROM app_users WHERE clerk_id = $1",
+			[req.authUserId],
+		);
+
+		const itemDetails = seats.rows.map((seat) => ({
+			id: seat.id,
+			price: Number(seat.unitPrice),
+			quantity: 1,
+			name: `${ticket.eventTitle} ${seat.zoneCode}-${seat.label}`.slice(0, 50),
+		}));
+		// Midtrans requires the line items to sum exactly to gross_amount, and each price to be
+		// a whole number. Older events may hold fractional seat prices, so fall back to one line.
+		const itemsAreValid =
+			itemDetails.length > 0 &&
+			itemDetails.every((item) => Number.isInteger(item.price)) &&
+			itemDetails.reduce((sum, item) => sum + item.price, 0) === grossAmount;
+
+		const snap = await createSnapTransaction({
+			transaction_details: { order_id: orderId, gross_amount: grossAmount },
+			item_details: itemsAreValid
+				? itemDetails
+				: [
+						{
+							id: ticket.id,
+							price: grossAmount,
+							quantity: 1,
+							name: String(ticket.eventTitle).slice(0, 50),
+						},
+					],
+			customer_details: {
+				first_name: (customer.rows[0] && customer.rows[0].firstName) || "Tickify",
+				last_name: (customer.rows[0] && customer.rows[0].lastName) || "Guest",
+				email: (customer.rows[0] && customer.rows[0].email) || undefined,
+			},
+			// Instant channels only: anything asynchronous could settle after the seat hold is
+			// swept, leaving a paid ticket whose seats have already been released.
+			enabled_payments: INSTANT_PAYMENTS,
+			// Expire the Snap session with the hold for the same reason.
+			expiry: {
+				unit: "minute",
+				duration: Math.max(1, Math.floor(millisecondsLeft / 60000)),
+			},
+			callbacks: {
+				finish: `${env.frontendOrigins[0]}/checkout?ticketId=${ticket.id}`,
+			},
+		});
+
+		await db.query(
+			`INSERT INTO payments (ticket_id, order_id, gross_amount, currency, snap_token)
+			 VALUES ($1, $2, $3, $4, $5)`,
+			[ticket.id, orderId, grossAmount, ticket.currency, snap.token],
+		);
+		return ok(res, {
+			orderId,
+			snapToken: snap.token,
+			clientKey: env.midtrans.clientKey,
+		});
+	} catch (error) {
+		return next(error);
+	}
+});
+
+// Browser-driven fallback for when the webhook has not landed yet — or cannot, because the
+// API is running on localhost. Asks Midtrans directly rather than trusting the client.
+router.post(
+	"/tickets/:id/payment/sync",
+	...authenticated,
+	async (req, res, next) => {
+		try {
+			const ticket = await payableTicket(req.params.id, req.authUserId);
+			const payment = await db.query(
+				"SELECT order_id FROM payments WHERE ticket_id = $1 ORDER BY created_at DESC LIMIT 1",
+				[ticket.id],
+			);
+			if (payment.rowCount === 0) {
+				throw httpError(
+					404,
+					"PAYMENT_NOT_FOUND",
+					"No payment has been started for this ticket.",
+				);
+			}
+			const orderId = payment.rows[0].order_id;
+			const status = await getTransactionStatus(orderId);
+			const result = await applyPaymentOutcome(orderId, status);
+			return ok(res, result);
+		} catch (error) {
+			return next(error);
+		}
+	},
+);
+
+// Public endpoint: anyone can POST here, so the signature check is what makes it trustworthy.
+router.post("/webhooks/midtrans", async (req, res, next) => {
+	try {
+		const notification = req.body || {};
+		if (!verifyNotificationSignature(notification)) {
+			throw httpError(
+				401,
+				"INVALID_SIGNATURE",
+				"Signature verification failed.",
+			);
+		}
+		const result = await applyPaymentOutcome(notification.order_id, notification);
+		return ok(res, result);
 	} catch (error) {
 		return next(error);
 	}
@@ -567,6 +873,7 @@ router.post(
 		try {
 			const body = req.body;
 			await ownedVenue(required(body.venueId, "venueId"), req.authUserId);
+			const currency = supportedCurrency(body.currency);
 			const files = filesByField(req);
 			const images = parseArray(body.images);
 			const lineup = parseArray(body.lineup);
@@ -588,7 +895,7 @@ router.post(
 			const event = await db.transaction(async (client) => {
 				const created = await client.query(
 					`INSERT INTO events (owner_clerk_id, venue_id, title, slug, category, badge_text, summary, description, hero_image_url, doors_at, starts_at, ends_at, currency, status)
-				 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,UPPER(COALESCE($13, 'USD')),$14::event_status) RETURNING *`,
+				 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::event_status) RETURNING *`,
 					[
 						req.authUserId,
 						body.venueId,
@@ -602,7 +909,7 @@ router.post(
 						body.doorsAt || null,
 						required(body.startsAt, "startsAt"),
 						body.endsAt || null,
-						body.currency || "USD",
+						currency,
 						body.status || "draft",
 					],
 				);
@@ -620,7 +927,7 @@ router.post(
 							created.rows[0].id,
 							seat.zoneCode,
 							seat.label,
-							positiveNumber(seat.price, "seat price"),
+							wholeNumber(seat.price, "seat price"),
 						],
 					);
 				}
@@ -673,6 +980,7 @@ router.patch(
 			await ownedEvent(req.params.id, req.authUserId);
 			const body = req.body;
 			if (body.venueId) await ownedVenue(body.venueId, req.authUserId);
+			if (body.currency) supportedCurrency(body.currency);
 			const imageUrl =
 				(await uploadImage(req.file, "tickify/events")) ||
 				body.heroImageUrl ||

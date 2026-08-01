@@ -1,13 +1,15 @@
 export function formatCurrency(
 	value: number | string | null | undefined,
-	currency = "USD",
+	currency = "IDR",
 ) {
 	const amount = Number(value || 0);
-	return new Intl.NumberFormat("en-US", {
+	// Rupiah has no minor unit, and reads naturally only in the Indonesian locale.
+	const isRupiah = currency === "IDR";
+	return new Intl.NumberFormat(isRupiah ? "id-ID" : "en-US", {
 		style: "currency",
 		currency,
 		minimumFractionDigits: 0,
-		maximumFractionDigits: 2,
+		maximumFractionDigits: isRupiah ? 0 : 2,
 	}).format(amount);
 }
 

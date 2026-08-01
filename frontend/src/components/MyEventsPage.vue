@@ -48,8 +48,8 @@ function emptyForm() {
 		startsAt: "",
 		endsAt: "",
 		doorsAt: "",
-		currency: "USD",
-		ticketPrice: 25,
+		currency: "IDR",
+		ticketPrice: 150000,
 		seatCount: 20,
 		status: "draft",
 		images: [] as EventImage[],
@@ -124,7 +124,7 @@ async function createEvent() {
 	append("startsAt", toIsoString(form.value.startsAt));
 	append("endsAt", toIsoString(form.value.endsAt));
 	append("doorsAt", toIsoString(form.value.doorsAt));
-	append("currency", form.value.currency.trim().toUpperCase() || "USD");
+	append("currency", form.value.currency);
 	append("status", form.value.status);
 	body.append("seats", JSON.stringify(seats));
 	body.append(
@@ -265,10 +265,13 @@ watch(isSignedIn, loadEvents);
 								class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label
 						><label class="font-bold uppercase"
 							>Currency<input
-								v-model.trim="form.currency"
-								maxlength="3"
-								placeholder="USD"
-								class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal uppercase" /></label
+								:value="form.currency"
+								readonly
+								aria-readonly="true"
+								class="mt-2 w-full cursor-not-allowed border-2 border-[#1a1a1a] bg-gray-100 p-3 font-normal uppercase" /><span
+								class="mt-1 block text-xs font-normal normal-case text-gray-500"
+								>Midtrans settles in rupiah only.</span
+							></label
 						><label class="font-bold uppercase"
 							>Starts at<input
 								v-model="form.startsAt"
@@ -294,12 +297,16 @@ watch(isSignedIn, loadEvents);
 								<option value="published">Published</option>
 							</select></label
 						><label class="font-bold uppercase"
-							>Ticket price<input
+							>Ticket price (IDR)<input
 								v-model.number="form.ticketPrice"
-								min="0"
+								min="1"
+								step="1"
 								required
 								type="number"
-								class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label
+								class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /><span
+								class="mt-1 block text-xs font-normal normal-case text-gray-500"
+								>Whole rupiah, no decimals.</span
+							></label
 						><label class="font-bold uppercase"
 							>Seat count<input
 								v-model.number="form.seatCount"

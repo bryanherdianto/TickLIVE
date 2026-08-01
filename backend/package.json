@@ -6,7 +6,8 @@
 		"start": "node index.js",
 		"dev": "nodemon index.js",
 		"check": "node --check index.js && node --check src/app.js && node --check src/routes/api.routes.js",
-		"db:reset": "node scripts/reset-database.js"
+		"db:reset": "node scripts/reset-database.js",
+		"db:migrate": "node scripts/migrate.js"
 	},
 	"author": "",
 	"license": "ISC",

@@ -9,6 +9,22 @@ if (missing.length > 0) {
 	);
 }
 
+const midtransIsProduction =
+	String(process.env.MIDTRANS_IS_PRODUCTION || "").toLowerCase() === "true";
+const midtransServerKey = process.env.MIDTRANS_SERVER_KEY;
+
+// Guardrail against charging real cards by accident: a live key only loads when the
+// operator has explicitly opted into production.
+if (
+	midtransServerKey &&
+	!midtransIsProduction &&
+	!midtransServerKey.startsWith("SB-")
+) {
+	throw new Error(
+		"MIDTRANS_SERVER_KEY looks like a production key while MIDTRANS_IS_PRODUCTION is false. Use a sandbox key (SB-Mid-server-…) or set MIDTRANS_IS_PRODUCTION=true deliberately.",
+	);
+}
+
 module.exports = {
 	port: Number(process.env.PORT || 3000),
 	databaseUrl: process.env.PG_CONNECTION_STRING,
@@ -22,5 +38,10 @@ module.exports = {
 		cloudName: process.env.CLOUDINARY_CLOUD_NAME,
 		apiKey: process.env.CLOUDINARY_API_KEY,
 		apiSecret: process.env.CLOUDINARY_API_SECRET,
+	},
+	midtrans: {
+		serverKey: midtransServerKey,
+		clientKey: process.env.MIDTRANS_CLIENT_KEY,
+		isProduction: midtransIsProduction,
 	},
 };

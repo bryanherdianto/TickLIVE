@@ -49,6 +49,13 @@ FRONTEND_ORIGIN=http://localhost:5173,http://localhost:3000
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
+
+# Midtrans Snap, from Dashboard > Settings > Access Keys with the environment set to Sandbox.
+# The server key is server-only. The API refuses to boot on a non-SB key while
+# MIDTRANS_IS_PRODUCTION is false, so a live key cannot be loaded by accident.
+MIDTRANS_SERVER_KEY=SB-Mid-server-xxxxxxxxxxxx
+MIDTRANS_CLIENT_KEY=SB-Mid-client-xxxxxxxxxxxx
+MIDTRANS_IS_PRODUCTION=false
 ```
 
 ### Frontend: `frontend/.env`
@@ -56,7 +63,27 @@ CLOUDINARY_API_SECRET=your_api_secret
 ```env
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
 VITE_API_BASE_URL=http://localhost:3000/api
+
+# Public by design. The server key never reaches the browser.
+VITE_MIDTRANS_CLIENT_KEY=SB-Mid-client-xxxxxxxxxxxx
 ```
+
+### Payments
+
+Checkout runs on the Midtrans **sandbox**: no real money moves, and real cards do not work.
+Pay with test card `4811 1111 1111 1114`, any future expiry, CVV `123`, OTP `112233`.
+
+Two rules follow from the 15 minute seat hold:
+
+- Only instant payment channels are enabled (card, GoPay, ShopeePay, QRIS). Bank transfer and
+  convenience-store payments can settle hours later, after the hold has been swept.
+- Events are priced in IDR only, in whole rupiah, because that is what Midtrans settles in.
+
+Midtrans confirms payments by calling `POST /api/webhooks/midtrans`, which cannot reach
+`localhost`. Local checkout still works end to end: after the Snap window closes, the frontend
+calls `POST /api/tickets/:id/payment/sync`, and the server re-checks the status with Midtrans
+directly. Once deployed, set the notification URL in the Midtrans dashboard to
+`https://your-api-host/api/webhooks/midtrans` — the webhook is the durable source of truth.
 
 Leaflet and OpenStreetMap do not require a map API key for the basic map display. For production, follow the [OpenStreetMap tile usage policy](https://operations.osmfoundation.org/policies/tiles/) or use a dedicated tile provider if traffic becomes substantial.
 
@@ -77,6 +104,14 @@ Reset the database once before starting the backend. This intentionally removes 
 ```sh
 cd backend
 npm run db:reset
+```
+
+If you already have data you want to keep, apply the additive migrations instead. This adds the
+`payments` table and switches the default event currency to IDR without dropping anything:
+
+```sh
+cd backend
+npm run db:migrate
 ```
 
 Start the backend from the `backend` directory:
