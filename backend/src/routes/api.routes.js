@@ -57,6 +57,30 @@ function wholeNumber(value, name) {
 	return number;
 }
 
+// The events table enforces this ordering too, but a raw constraint violation surfaces as a
+// generic "one or more values are invalid", which tells the organizer nothing about which
+// field to fix.
+function validateSchedule({ startsAt, endsAt, doorsAt }) {
+	const start = new Date(startsAt);
+	if (Number.isNaN(start.valueOf())) {
+		throw httpError(400, "VALIDATION_ERROR", "startsAt must be a valid date.");
+	}
+	if (endsAt && new Date(endsAt) <= start) {
+		throw httpError(
+			400,
+			"VALIDATION_ERROR",
+			"The end time must be after the start time.",
+		);
+	}
+	if (doorsAt && new Date(doorsAt) > start) {
+		throw httpError(
+			400,
+			"VALIDATION_ERROR",
+			"Doors must open at or before the start time.",
+		);
+	}
+}
+
 function supportedCurrency(value) {
 	const currency = String(value || SUPPORTED_CURRENCY).toUpperCase();
 	if (currency !== SUPPORTED_CURRENCY) {
@@ -105,7 +129,8 @@ async function ownedVenue(venueId, ownerId, client = db) {
 
 async function ownedEvent(eventId, ownerId, client = db) {
 	const result = await client.query(
-		"SELECT id, title FROM events WHERE id = $1 AND owner_clerk_id = $2",
+		`SELECT id, title, starts_at AS "startsAt", ends_at AS "endsAt", doors_at AS "doorsAt"
+		 FROM events WHERE id = $1 AND owner_clerk_id = $2`,
 		[eventId, ownerId],
 	);
 	if (result.rowCount === 0)
@@ -874,6 +899,11 @@ router.post(
 			const body = req.body;
 			await ownedVenue(required(body.venueId, "venueId"), req.authUserId);
 			const currency = supportedCurrency(body.currency);
+			validateSchedule({
+				startsAt: required(body.startsAt, "startsAt"),
+				endsAt: body.endsAt || null,
+				doorsAt: body.doorsAt || null,
+			});
 			const files = filesByField(req);
 			const images = parseArray(body.images);
 			const lineup = parseArray(body.lineup);
@@ -977,10 +1007,17 @@ router.patch(
 	upload.single("image"),
 	async (req, res, next) => {
 		try {
-			await ownedEvent(req.params.id, req.authUserId);
+			const existing = await ownedEvent(req.params.id, req.authUserId);
 			const body = req.body;
 			if (body.venueId) await ownedVenue(body.venueId, req.authUserId);
 			if (body.currency) supportedCurrency(body.currency);
+			// The update COALESCEs each field, so validate the merged result rather than the
+			// patch alone — moving only startsAt can still invalidate a stored endsAt.
+			validateSchedule({
+				startsAt: body.startsAt || existing.startsAt,
+				endsAt: body.endsAt || existing.endsAt,
+				doorsAt: body.doorsAt || existing.doorsAt,
+			});
 			const imageUrl =
 				(await uploadImage(req.file, "tickify/events")) ||
 				body.heroImageUrl ||

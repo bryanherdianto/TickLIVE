@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useAuth } from "@clerk/vue";
 import { RouterLink } from "vue-router";
 import Footer from "./Footer.vue";
@@ -76,6 +76,17 @@ function removeArtist(index: number) {
 function toIsoString(value: string) {
 	return value ? new Date(value).toISOString() : null;
 }
+// Mirrors the CHECK constraints on the events table so an ordering mistake is caught in the
+// form instead of coming back as a database rejection.
+const scheduleError = computed(() => {
+	const { startsAt, endsAt, doorsAt } = form.value;
+	if (!startsAt) return "";
+	if (endsAt && new Date(endsAt) <= new Date(startsAt))
+		return "The end time must be after the start time.";
+	if (doorsAt && new Date(doorsAt) > new Date(startsAt))
+		return "Doors must open at or before the start time.";
+	return "";
+});
 async function loadEvents() {
 	if (!isSignedIn.value) return;
 	isLoading.value = true;
@@ -99,6 +110,10 @@ async function loadEvents() {
 	}
 }
 async function createEvent() {
+	if (scheduleError.value) {
+		errorMessage.value = scheduleError.value;
+		return;
+	}
 	const seats = Array.from(
 		{ length: Math.min(Math.max(Number(form.value.seatCount), 1), 250) },
 		(_, index) => ({
@@ -233,6 +248,12 @@ watch(isSignedIn, loadEvents);
 					>
 						Create a venue before you create an event.
 					</p>
+					<p
+						v-else-if="scheduleError"
+						class="sm:col-span-2 border-2 border-[#e63b2e] bg-[#ffdad6] p-3 font-bold"
+					>
+						{{ scheduleError }}
+					</p>
 					<template v-else
 						><label class="sm:col-span-2 font-bold uppercase"
 							>Title<input
@@ -281,11 +302,13 @@ watch(isSignedIn, loadEvents);
 						><label class="font-bold uppercase"
 							>Ends at<input
 								v-model="form.endsAt"
+								:min="form.startsAt"
 								type="datetime-local"
 								class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label
 						><label class="font-bold uppercase"
 							>Doors open<input
 								v-model="form.doorsAt"
+								:max="form.startsAt"
 								type="datetime-local"
 								class="mt-2 w-full border-2 border-[#1a1a1a] p-3 font-normal" /></label
 						><label class="font-bold uppercase"
