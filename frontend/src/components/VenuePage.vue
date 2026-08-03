@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
-import { ArrowRightIcon, StarIcon } from "@heroicons/vue/20/solid";
+import { ArrowRightIcon } from "@heroicons/vue/20/solid";
 import Header from "./Header.vue";
 import Footer from "./Footer.vue";
 import { apiRequest } from "@/lib/api";
@@ -13,7 +13,6 @@ type Venue = {
 	city: string;
 	address: string;
 	capacity: number;
-	rating: string;
 	imageUrl: string | null;
 	currentEvent: string | null;
 };
@@ -150,12 +149,9 @@ onMounted(loadVenues);
 							</p>
 						</div>
 						<div
-							class="mt-auto flex flex-col gap-4 border-t-2 border-[#1a1a1a]/10 pt-5 sm:flex-row sm:items-center sm:justify-between"
+							class="mt-auto flex flex-col gap-4 border-t-2 border-[#1a1a1a]/10 pt-5 sm:flex-row sm:items-center sm:justify-end"
 						>
-							<span
-								class="flex w-fit items-center gap-1.5 border-2 border-[#1a1a1a] bg-[#ffcc00] px-2 py-0.5 font-black shadow-[2px_2px_0_0_#1a1a1a]"
-								><StarIcon class="size-4" />{{ venue.rating }}</span
-							><RouterLink
+							<RouterLink
 								:to="{
 									name: 'venue-details',
 									params: { id: venue.slug || venue.id },
